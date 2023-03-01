@@ -1,4 +1,47 @@
 ##### javax.servlet.Filter
+> filter过滤器，对从客户端向服务端发送的请求进行过滤,也可以对服务端返回的响应进行处理.
+> 应用场景有权限认证、敏感词过滤、压缩响应等.
+
+**在web.xml中配置过滤器**
+```xml
+<filter>
+    <!-- 过滤器名称 -->
+    <filter-name>loginFilter</filter-name>
+    <!-- 过滤器的包路径 -->
+    <filter-class>com.youaresherlock.login.loginFilter</filter-class>
+</filter>
+<!-- 可选过滤器初始化参数 -->
+<init-param>
+    <param-name>参数名</param-name>
+    <param-value>参数值</param-value>
+<init-param>
+<!-- 过滤器映射 -->
+<filter-mapping>
+    <filter-name>loginFilter</filter-name>
+    <!-- 指定过滤器作用的对象 -->
+    <url-pattern>*.jsp</url-pattern>
+</filter-mapping>
+<filter-mapping>
+    <filter-name>loginFilter</filter-name>
+    <url-pattern>*.do</url-pattern>
+</filter-mapping>
+```
+
+___
+
+**filter拦截流程**
+
+* 当客户端发送请求后，在HttpServletRequest到达Servlet之前，Filter拦截客户端的HttpServletRequest
+* 根据需要检查HttpServletRequest
+* 在Filter调用doFilter对过滤放行。
+* 到达Servlet后，处理请求，并产生HttpServletResponse响应给客户端
+* 在HttpServletResponse到达客户端之前过滤拦截
+* 根据需要对HttpServletResponse进行处理
+* HttpServletResponse 到达客户端
+
+___
+
+**Filter.java**
 ```java
 package javax.servlet;
 

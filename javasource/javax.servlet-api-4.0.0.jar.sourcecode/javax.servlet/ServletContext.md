@@ -1,4 +1,21 @@
 ##### javax.servlet.ServletContext
+**在web.xml中配置ServletContext初始化参数**
+```xml
+<!-- 下面创建了两个配置项，分别是name=clarence，age=18 
+所有的servlet都可以访问全局参数
+-->
+<context-param>
+	<param-name>name</param-name>
+	<param-value>clarence</param-value>
+</context-param>
+ 
+<context-param>
+	<param-name>age</param-name>
+	<param-value>18</param-value>
+</context-param>
+```
+___
+
 ```java
 package javax.servlet;
 
@@ -176,15 +193,13 @@ public interface ServletContext {
 
 
     /**
-     * Returns the servlet container attribute with the given name, or
-     * <code>null</code> if there is no attribute by that name.
+     * 返回给定name的servlet容器的属性,如果不存在则为null
      */
     public Object getAttribute(String name);
 
 
     /**
-     * Returns an <code>Enumeration</code> containing the
-     * attribute names available within this ServletContext.
+     * 返回此ServletContext的所有属性名集合
      */
     public Enumeration<String> getAttributeNames();
 
