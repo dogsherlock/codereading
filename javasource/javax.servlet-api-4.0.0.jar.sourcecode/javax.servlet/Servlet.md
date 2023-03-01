@@ -1,4 +1,46 @@
 ##### javax.servlet.Servlet
+**servlet配置**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="WebApp_ID" version="3.1">
+	<display-name>SimpleWebDemo</display-name>
+	<context-param><!-- 为整个web容器配置初始化参数，供所有的Servlet使用 -->
+		<param-name>BlogTitle</param-name>
+		<param-value>clarence's blog</param-value>
+	</context-param>
+	<servlet>
+		<description>xml文件的编写</description><!-- servlet的描述信息 -->
+		<display-name>第一个Servlet</display-name><!--Servlet的显示名 -->
+		<servlet-name>LoginServlet</servlet-name><!-- servlet的名称 -->
+		<servlet-class>servlet全限定名称</servlet-class><!-- 
+			Servlet的类全名 -->
+		<init-param><!--指定初始化参数， 可以重复定义 -->
+			<param-name>username</param-name><!-- 初始化参数名称 -->
+			<param-value>clarence</param-value><!-- 初始化参数值 -->
+		</init-param>
+		<init-param>
+			<param-name>userpass</param-name>
+			<param-value>123456</param-value>
+		</init-param>
+        <!-- 
+            >=0,表示容器在应用启动时就加在这个servlet,
+            当<0或者没有指定时，则指示容器在该servlet被选择时才加载
+            正数值越小，启动该servlet的优先级越高
+        -->
+		<load-on-startup>0</load-on-startup>
+	</servlet>
+
+	<servlet-mapping><!-- 映射 -->
+		<servlet-name>FirstServelt</servlet-name>
+		<url-pattern>/firstServlet</url-pattern><!--映射的地址 -->
+	</servlet-mapping>
+</web-app>
+```
+___
+
 ```java
 package javax.servlet;
 

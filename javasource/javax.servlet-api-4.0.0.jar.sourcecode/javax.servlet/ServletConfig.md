@@ -7,7 +7,7 @@ import java.util.Enumeration;
 /**
  * servlet容器初始化servlet时通过servlet配置对象来传递信息
  */
- public interface ServletConfig {
+public interface ServletConfig {
     
     /**
      * 返回servlet实例的name
