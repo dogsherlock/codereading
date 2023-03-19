@@ -12,14 +12,22 @@
 		<param-value>clarence's blog</param-value>
 	</context-param>
 	<servlet>
-		<description>xml文件的编写</description><!-- servlet的描述信息 -->
-		<display-name>第一个Servlet</display-name><!--Servlet的显示名 -->
-		<servlet-name>LoginServlet</servlet-name><!-- servlet的名称 -->
-		<servlet-class>servlet全限定名称</servlet-class><!-- 
-			Servlet的类全名 -->
-		<init-param><!--指定初始化参数， 可以重复定义 -->
-			<param-name>username</param-name><!-- 初始化参数名称 -->
-			<param-value>clarence</param-value><!-- 初始化参数值 -->
+        <!-- servlet的描述信息 -->
+		<description>xml文件的编写</description>
+        <!--Servlet的显示名 -->
+		<display-name>第一个Servlet</display-name>
+        <!-- servlet的名称 -->
+		<servlet-name>LoginServlet</servlet-name>
+        <!-- Servlet的类全名 -->
+		<servlet-class>servlet全限定名称</servlet-class>
+        <!-- 是否开启支持servlet的异步请求操作 -->
+        <async-supported>true</async-supported>
+        <!--指定初始化参数， 可以重复定义 -->
+		<init-param>
+            <!-- 初始化参数名称 -->
+			<param-name>username</param-name>
+            <!-- 初始化参数值 -->
+			<param-value>clarence</param-value>
 		</init-param>
 		<init-param>
 			<param-name>userpass</param-name>
@@ -59,8 +67,6 @@ import java.io.IOException;
  * </ol>
  * getServletConfig()方法用来获取servlet启动信息,getServletInfo()可以返回servlet的基本信息
  */
-
-
 public interface Servlet {
 
     /**
@@ -68,15 +74,11 @@ public interface Servlet {
      * 异常或者在规定时间没有返回，那么无法放入servlet容器
      */
     public void init(ServletConfig config) throws ServletException;
-    
-    
 
     /**
      * 返回servlet的配置信息
      */
     public ServletConfig getServletConfig();
-    
-    
 
     /**
      * 由servlet容器主动调用来响应请求
@@ -85,8 +87,6 @@ public interface Servlet {
     public void service(ServletRequest req, ServletResponse res)
 	throws ServletException, IOException;
 	
-	
-
     /**
      * 返回servlet的纯文本信息，如作者、版本以及版权
      * Returns information about the servlet, such
@@ -94,13 +94,10 @@ public interface Servlet {
      */
 
     public String getServletInfo();
-    
-    
 
     /**
      * 由servlet容器调用来指示此servlet正被移出服务.
      */
-
     public void destroy();
 }
 ```
