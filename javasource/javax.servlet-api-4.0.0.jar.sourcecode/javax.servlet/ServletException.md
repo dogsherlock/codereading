@@ -18,7 +18,7 @@ public class ServletException extends Exception {
     }
 
     /**
-     * 使用message构造新的servelt异常
+     * 使用message构造新的servlet异常
      */
     public ServletException(String message) {
 	super(message);
