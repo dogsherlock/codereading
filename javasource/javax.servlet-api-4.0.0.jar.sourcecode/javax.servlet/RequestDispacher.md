@@ -103,7 +103,7 @@ public interface RequestDispatcher {
 
     /**
      * forward 方法可以允许一个 servlet 对请求做一些前置的处理, 然后传递给另一个资源
-     * 来生成响应(资源如: servelt, jsp文件, html文件)
+     * 来生成响应(资源如: servlet, jsp文件, html文件)
      * 此方法将请求的dispatcher类型设置为DispatcherType.FORWARD
      */
     public void forward(ServletRequest request, ServletResponse response)

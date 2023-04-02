@@ -10,25 +10,18 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Provides a convenient implementation of the ServletRequest interface that
- * can be subclassed by developers wishing to adapt the request to a Servlet.
- * This class implements the Wrapper or Decorator pattern. Methods default to
- * calling through to the wrapped request object.
- *
- * @see javax.servlet.ServletRequest
- *
- * @since Servlet 2.3
+ * 提供了ServletRequest接口的便捷实现，可以供开发者实现其子类来包装发往Servlet
+ * 的请求.此类实现了装饰器模式，请求的方法默认会经过包装的request对象.
  */
-
 public class ServletRequestWrapper implements ServletRequest {
-
+    /**
+     * ServletRequestWrapper持有ServletRequest的实例
+     */
     private ServletRequest request;
 
     /**
-     * Creates a ServletRequest adaptor wrapping the given request object. 
+     * 用给定的ServletRequest obj创建ServletRequestWrapper obj
      * @throws java.lang.IllegalArgumentException if the request is null
-     *
-     * @param request the {@link ServletRequest} to be wrapped
      */
     public ServletRequestWrapper(ServletRequest request) {
         if (request == null) {
@@ -37,24 +30,17 @@ public class ServletRequestWrapper implements ServletRequest {
         this.request = request;
     }
 
-
     /**
-     * Return the wrapped request object.
-     *
-     * @return the wrapped {@link ServletRequest}
+     * 获取包装的request obj
      */
     public ServletRequest getRequest() {
         return this.request;
     }
 
-
     /**
-     * Sets the request object being wrapped. 
-     *
-     * @param request the {@link ServletRequest} to be installed
+     * 设置被包裹的request obj
      *
      * @throws java.lang.IllegalArgumentException if the request is null.
-     * 
      */
     public void setRequest(ServletRequest request) {
         if (request == null) {
@@ -63,353 +49,234 @@ public class ServletRequestWrapper implements ServletRequest {
         this.request = request;
     }
 
-
     /**
-     * The default behavior of this method is to call getAttribute(String name)
-     * on the wrapped request object.
+     * 获取request属性
      */
     public Object getAttribute(String name) {
         return this.request.getAttribute(name);
     }
 
-
     /**
-     * The default behavior of this method is to return getAttributeNames()
-     * on the wrapped request object.
+     * 获取request属性名集合
      */
     public Enumeration<String> getAttributeNames() {
         return this.request.getAttributeNames();
     }    
 
-
     /**
-     * The default behavior of this method is to return getCharacterEncoding()
-     * on the wrapped request object.
+     * 获取request的字符编码格式
      */
     public String getCharacterEncoding() {
         return this.request.getCharacterEncoding();
     }
 
-
     /**
-     * The default behavior of this method is to set the character encoding
-     * on the wrapped request object.
+     * 设置request的字符编码格式
      */
     public void setCharacterEncoding(String enc)
             throws UnsupportedEncodingException {
         this.request.setCharacterEncoding(enc);
     }
 
-
     /**
-     * The default behavior of this method is to return getContentLength()
-     * on the wrapped request object.
+     * 获取request的请求体长度
      */
     public int getContentLength() {
         return this.request.getContentLength();
     }
 
     /**
-     * The default behavior of this method is to return getContentLengthLong()
-     * on the wrapped request object.
-     *
-     * @since Servlet 3.1
+     * 同上
      */
     public long getContentLengthLong() {
         return this.request.getContentLengthLong();
     }
 
-
     /**
-     * The default behavior of this method is to return getContentType()
-     * on the wrapped request object.
+     * 获取request的MIME类型
      */
     public String getContentType() {
         return this.request.getContentType();
     }
 
-
     /**
-     * The default behavior of this method is to return getInputStream()
-     * on the wrapped request object.
+     * 返回request的输入流
      */
     public ServletInputStream getInputStream() throws IOException {
         return this.request.getInputStream();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getParameter(String name) on the wrapped request object.
+     * 获取request的查询字符串或form表单数据
      */
     public String getParameter(String name) {
         return this.request.getParameter(name);
     }
 
-
     /**
-     * The default behavior of this method is to return getParameterMap()
-     * on the wrapped request object.
+     * 同ServletRequest#getParameterMap
      */
     public Map<String, String[]> getParameterMap() {
         return this.request.getParameterMap();
     }
 
-
     /**
-     * The default behavior of this method is to return getParameterNames()
-     * on the wrapped request object.
+     * 同ServletRequest#getParameterNames
      */
     public Enumeration<String> getParameterNames() {
         return this.request.getParameterNames();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getParameterValues(String name) on the wrapped request object.
+     * 同ServletRequest#getParameterValues
      */
     public String[] getParameterValues(String name) {
         return this.request.getParameterValues(name);
     }
 
-
     /**
-     * The default behavior of this method is to return getProtocol()
-     * on the wrapped request object.
+     * 获取request的protocol
      */
     public String getProtocol() {
         return this.request.getProtocol();
     }
 
-
     /**
-     * The default behavior of this method is to return getScheme()
-     * on the wrapped request object.
+     * 获取request uri的scheme
      */
     public String getScheme() {
         return this.request.getScheme();
     }
 
-
     /**
-     * The default behavior of this method is to return getServerName()
-     * on the wrapped request object.
+     * 同ServletRequest#getServerName
      */
     public String getServerName() {
         return this.request.getServerName();
     }
 
-
     /**
-     * The default behavior of this method is to return getServerPort()
-     * on the wrapped request object.
+     * 同ServletRequest#getServerPort
      */
     public int getServerPort() {
         return this.request.getServerPort();
     }
 
-
     /**
-     * The default behavior of this method is to return getReader()
-     * on the wrapped request object.
+     * 同ServletRequest#getReader
      */
     public BufferedReader getReader() throws IOException {
         return this.request.getReader();
     }
 
-
     /**
-     * The default behavior of this method is to return getRemoteAddr()
-     * on the wrapped request object.
+     * 同ServletRequest#getRemoteAddr
      */
     public String getRemoteAddr() {
         return this.request.getRemoteAddr();
     }
 
-
     /**
-     * The default behavior of this method is to return getRemoteHost()
-     * on the wrapped request object.
+     * 同ServletRequest#getRemoteHost
      */
     public String getRemoteHost() {
         return this.request.getRemoteHost();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * setAttribute(String name, Object o) on the wrapped request object.
+     * 给request设置属性
      */
     public void setAttribute(String name, Object o) {
         this.request.setAttribute(name, o);
     }
 
-
     /**
-     * The default behavior of this method is to call
-     * removeAttribute(String name) on the wrapped request object.
+     * 从request移除属性
      */
     public void removeAttribute(String name) {
         this.request.removeAttribute(name);
     }
 
-
     /**
-     * The default behavior of this method is to return getLocale()
-     * on the wrapped request object.
+     * 同ServletRequest#getLocale
      */
     public Locale getLocale() {
         return this.request.getLocale();
     }
 
-
     /**
-     * The default behavior of this method is to return getLocales()
-     * on the wrapped request object.
+     * 同ServletRequest#getLocales
      */
     public Enumeration<Locale> getLocales() {
         return this.request.getLocales();
     }
 
-
     /**
-     * The default behavior of this method is to return isSecure()
-     * on the wrapped request object.
+     * 同ServletRequest#isSecure
      */
     public boolean isSecure() {
         return this.request.isSecure();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getRequestDispatcher(String path) on the wrapped request object.
+     * 同ServletRequest#getRequestDispatcher
      */
     public RequestDispatcher getRequestDispatcher(String path) {
         return this.request.getRequestDispatcher(path);
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getRealPath(String path) on the wrapped request object.
-     *
-     * @deprecated As of Version 2.1 of the Java Servlet API,
-     * use {@link ServletContext#getRealPath} instead
+     * 同ServletRequest#getRealPath
      */
     @Deprecated
     public String getRealPath(String path) {
         return this.request.getRealPath(path);
     }
-
     
     /**
-     * The default behavior of this method is to return
-     * getRemotePort() on the wrapped request object.
-     *
-     * @since Servlet 2.4
+     * 同ServletRequest#getRemotePort
      */    
     public int getRemotePort(){
         return this.request.getRemotePort();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getLocalName() on the wrapped request object.
-     *
-     * @since Servlet 2.4
+     * 同ServletRequest#getLocalName
      */
     public String getLocalName(){
         return this.request.getLocalName();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getLocalAddr() on the wrapped request object.
-     *
-     * @since Servlet 2.4
+     * 同ServletRequest#getLocalAddr
      */       
     public String getLocalAddr(){
         return this.request.getLocalAddr();
     }
 
-
     /**
-     * The default behavior of this method is to return
-     * getLocalPort() on the wrapped request object.
-     *
-     * @since Servlet 2.4
+     * 同ServletRequest#getLocalPort
      */
     public int getLocalPort(){
         return this.request.getLocalPort();
     }
 
-
     /**
-     * Gets the servlet context to which the wrapped servlet request was last
-     * dispatched.
-     *
-     * @return the servlet context to which the wrapped servlet request was
-     * last dispatched
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#getServletContext
      */
     public ServletContext getServletContext() {
         return request.getServletContext();
     }
 
-
     /**
-     * The default behavior of this method is to invoke
-     * {@link ServletRequest#startAsync} on the wrapped request object.
-     *
-     * @return the (re)initialized AsyncContext
-     * 
-     * @throws IllegalStateException if the request is within the scope of
-     * a filter or servlet that does not support asynchronous operations
-     * (that is, {@link #isAsyncSupported} returns false),
-     * or if this method is called again without any asynchronous dispatch
-     * (resulting from one of the {@link AsyncContext#dispatch} methods),
-     * is called outside the scope of any such dispatch, or is called again
-     * within the scope of the same dispatch, or if the response has
-     * already been closed
-     *
-     * @see ServletRequest#startAsync
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#startAsync
      */
     public AsyncContext startAsync() throws IllegalStateException {
         return request.startAsync();
     }
-    
 
     /**
-     * The default behavior of this method is to invoke
-     * {@link ServletRequest#startAsync(ServletRequest, ServletResponse)}
-     * on the wrapped request object.
-     *
-     * @param servletRequest the ServletRequest used to initialize the
-     * AsyncContext
-     * @param servletResponse the ServletResponse used to initialize the
-     * AsyncContext
-     *
-     * @return the (re)initialized AsyncContext
-     *
-     * @throws IllegalStateException if the request is within the scope of
-     * a filter or servlet that does not support asynchronous operations
-     * (that is, {@link #isAsyncSupported} returns false),
-     * or if this method is called again without any asynchronous dispatch
-     * (resulting from one of the {@link AsyncContext#dispatch} methods),
-     * is called outside the scope of any such dispatch, or is called again
-     * within the scope of the same dispatch, or if the response has
-     * already been closed
-     *
-     * @see ServletRequest#startAsync(ServletRequest, ServletResponse)
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#startAsync(ServletRequest, ServletResponse)
      */
     public AsyncContext startAsync(ServletRequest servletRequest,
                                    ServletResponse servletResponse)
@@ -417,60 +284,26 @@ public class ServletRequestWrapper implements ServletRequest {
         return request.startAsync(servletRequest, servletResponse);
     }
 
-
     /**
-     * Checks if the wrapped request has been put into asynchronous mode.
-     *
-     * @return true if this request has been put into asynchronous mode,
-     * false otherwise
-     *
-     * @see ServletRequest#isAsyncStarted
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#isAsyncStarted
      */
     public boolean isAsyncStarted() {
         return request.isAsyncStarted();
     }
 
-
     /**
-     * Checks if the wrapped request supports asynchronous operation.
-     *
-     * @return true if this request supports asynchronous operation, false
-     * otherwise
-     *
-     * @see ServletRequest#isAsyncSupported
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#isAsyncSupported
      */
     public boolean isAsyncSupported() {
         return request.isAsyncSupported();
     }
 
-
     /**
-     * Gets the AsyncContext that was created or reinitialized by the
-     * most recent invocation of {@link #startAsync} or
-     * {@link #startAsync(ServletRequest,ServletResponse)} on the wrapped
-     * request.
-     *
-     * @return the AsyncContext that was created or reinitialized by the
-     * most recent invocation of {@link #startAsync} or
-     * {@link #startAsync(ServletRequest,ServletResponse)} on
-     * the wrapped request 
-     *
-     * @throws IllegalStateException if this request has not been put 
-     * into asynchronous mode, i.e., if neither {@link #startAsync} nor
-     * {@link #startAsync(ServletRequest,ServletResponse)} has been called
-     *
-     * @see ServletRequest#getAsyncContext
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#getAsyncContext
      */
     public AsyncContext getAsyncContext() {
         return request.getAsyncContext();
     }
-
 
     /**
      * Checks (recursively) if this ServletRequestWrapper wraps the given
@@ -493,30 +326,23 @@ public class ServletRequestWrapper implements ServletRequest {
         }
     }
 
-
     /**
-     * Checks (recursively) if this ServletRequestWrapper wraps a
-     * {@link ServletRequest} of the given class type.
+     * 递归检查被包裹的ServletRequest对象是否为给定的类型
      *
-     * @param wrappedType the ServletRequest class type to
-     * search for
-     *
-     * @return true if this ServletRequestWrapper wraps a
-     * ServletRequest of the given class type, false otherwise
-     *
-     * @throws IllegalArgumentException if the given class does not
-     * implement {@link ServletRequest}
-     *
-     * @since Servlet 3.0
+     * @throws IllegalArgumentException 如果参数wrappedType
+     * 没有实现ServletRequest接口
      */
     public boolean isWrapperFor(Class<?> wrappedType) {
+       // 判断wrappedType是否合法(实现了此接口或者继承了此接口)
         if (!ServletRequest.class.isAssignableFrom(wrappedType)) {
             throw new IllegalArgumentException("Given class " +
-                wrappedType.getName() + " not a subinterface of " +
+                wrappedType.getName() + " not a subinterface of " +  
                 ServletRequest.class.getName());
         }
+        // 判断request是否是wrappedType的子类或者实现了wrappedType接口
         if (wrappedType.isAssignableFrom(request.getClass())) {
             return true;
+        // 如果request是派生自ServletRequestWrapper的实例，则递归判断
         } else if (request instanceof ServletRequestWrapper) {
             return ((ServletRequestWrapper) request).isWrapperFor(wrappedType);
         } else {
@@ -524,15 +350,8 @@ public class ServletRequestWrapper implements ServletRequest {
         }
     }
 
-
     /**
-     * Gets the dispatcher type of the wrapped request.
-     *
-     * @return the dispatcher type of the wrapped request
-     * 
-     * @see ServletRequest#getDispatcherType
-     *
-     * @since Servlet 3.0
+     * 同ServletRequest#getDispatcherType
      */
     public DispatcherType getDispatcherType() {
         return request.getDispatcherType();

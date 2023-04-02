@@ -9,67 +9,47 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 /**
- * Provides an output stream for sending binary data to the
- * client. A <code>ServletOutputStream</code> object is normally retrieved 
- * via the {@link ServletResponse#getOutputStream} method.
+ * 为向客户端发送二进制数据提供一个输出流.可以通过ServletResponse#getOutputStream
+ * 方法获取ServletOutputStream对象.
  *
- * <p>This is an abstract class that the servlet container implements.
- * Subclasses of this class
- * must implement the <code>java.io.OutputStream.write(int)</code>
- * method.
- *
- * 
- * @author         Various
- *
- * @see         ServletResponse
- *
+ * ServletOutputStream是一个抽象类.由servlet容器实现其子类，这个类的子类必须实现
+ * java.io.OutputStream.write(int)方法.
  */
-
 public abstract class ServletOutputStream extends OutputStream  {
-
+    /* 根据地区读取自定义名_语言代码_国别代码.properties文件 */
     private static final String LSTRING_FILE = "javax.servlet.LocalStrings";
     private static ResourceBundle lStrings =
         ResourceBundle.getBundle(LSTRING_FILE);
-
-
     
     /**
-     *
-     * Does nothing, because this is an abstract class.
-     *
+     * 无参构造函数，不做任何事
      */
-
     protected ServletOutputStream() { }
 
-
     /**
-     * Writes a <code>String</code> to the client, 
-     * without a carriage return-line feed (CRLF) 
-     * character at the end.
+     * 将字符串写入客户端，末尾没有回车换行(CRLF)字符
      *
-     *
-     * @param s                       the <code>String</code> to send to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void print(String s) throws IOException {
+        // s为null写入null字符串
         if (s==null) s="null";
         int len = s.length();
         for (int i = 0; i < len; i++) {
             char c = s.charAt (i);
 
-            //
-            // XXX NOTE:  This is clearly incorrect for many strings,
-            // but is the only consistent approach within the current
-            // servlet framework.  It must suffice until servlet output
-            // streams properly encode their output.
-            //
-            if ((c & 0xff00) != 0) {        // high order byte must be zero
+            /*
+             这是和当前servlet框架一致的唯一方法，但显然对于很多字符串是不正确的.
+             字符串需要满足servlet输出流可以编码输出
+             高位字节必须是0，否则抛出CharConversionException异常
+             */
+            if ((c & 0xff00) != 0) {  
+                // errMsg: Not an ISO 8859-1 character: {0}
+                // ISO-8859-1编码是单字节编码，向下兼容ASCII，其编码范围是0x00-0xFF
                 String errMsg = lStrings.getString("err.not_iso8859_1");
                 Object[] errArgs = new Object[1];
                 errArgs[0] = Character.valueOf(c);
+                // 字符串格式化 Not an ISO 8859-1 character: c
                 errMsg = MessageFormat.format(errMsg, errArgs);
                 throw new CharConversionException(errMsg);
             }
@@ -77,303 +57,167 @@ public abstract class ServletOutputStream extends OutputStream  {
         }
     }
 
-
-
     /**
-     * Writes a <code>boolean</code> value to the client,
-     * with no carriage return-line feed (CRLF) 
-     * character at the end.
+     * 将boolean值写入客户端，末尾无回车换行符
      *
-     * @param b                       the <code>boolean</code> value 
-     *                                to send to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void print(boolean b) throws IOException {
         String msg;
         if (b) {
+            // msg = "true"
             msg = lStrings.getString("value.true");
         } else {
+            // msg = "false"
             msg = lStrings.getString("value.false");
         }
         print(msg);
     }
 
-
-
     /**
-     * Writes a character to the client,
-     * with no carriage return-line feed (CRLF) 
-     * at the end.
+     * 将字符写入客户端，末尾无回车换行符
      *
-     * @param c                       the character to send to the client
-     *
-     * @exception IOException         if an input or output exception occurred
+     * @exception IOException I/O Exception
      *
      */
-
     public void print(char c) throws IOException {
         print(String.valueOf(c));
     }
 
-
-
-
     /**
+     * 将int写入客户端，末尾无回车换行符
      *
-     * Writes an int to the client,
-     * with no carriage return-line feed (CRLF) 
-     * at the end.
-     *
-     * @param i                       the int to send to the client
-     *
-     * @exception IOException         if an input or output exception occurred
+     * @exception IOException I/O Exception
      *
      */  
-
     public void print(int i) throws IOException {
         print(String.valueOf(i));
     }
-
-
-
  
     /**
-     * 
-     * Writes a <code>long</code> value to the client,
-     * with no carriage return-line feed (CRLF) at the end.
+     * 将long写入客户端，末尾无回车换行符
      *
-     * @param l                       the <code>long</code> value 
-     *                                to send to the client
+     * @exception IOException I/O Exception
      *
-     * @exception IOException         if an input or output exception 
-     *                                occurred
-     * 
-     */
-
+     */ 
     public void print(long l) throws IOException {
         print(String.valueOf(l));
     }
 
-
-
     /**
+     * 将float写入客户端，末尾无回车换行符
      *
-     * Writes a <code>float</code> value to the client,
-     * with no carriage return-line feed (CRLF) at the end.
+     * @exception IOException I/O Exception
      *
-     * @param f                       the <code>float</code> value
-     *                                to send to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
-     *
-     */
-
+     */ 
     public void print(float f) throws IOException {
         print(String.valueOf(f));
     }
 
-
-
     /**
+     * 将double写入客户端，末尾无回车换行符
      *
-     * Writes a <code>double</code> value to the client,
-     * with no carriage return-line feed (CRLF) at the end.
-     * 
-     * @param d                       the <code>double</code> value
-     *                                to send to the client
+     * @exception IOException I/O Exception
      *
-     * @exception IOException         if an input or output exception occurred
-     *
-     */
-
+     */ 
     public void print(double d) throws IOException {
         print(String.valueOf(d));
     }
 
-
-
     /**
-     * Writes a carriage return-line feed (CRLF)
-     * to the client.
+     * 将回车换行符(CRLF，即"\r\n")写入客户端
      *
-     *
-     *
-     * @exception IOException         if an input or output exception occurred
+     * @exception IOException I/O Exception
      *
      */
-
     public void println() throws IOException {
         print("\r\n");
     }
 
-
-
     /**
-     * Writes a <code>String</code> to the client, 
-     * followed by a carriage return-line feed (CRLF).
+     * 将字符串写入客户端，末尾带有回车换行(CRLF)字符
      *
-     *
-     * @param s                       the <code>String</code> to write to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void println(String s) throws IOException {
         print(s);
         println();
     }
 
-
-
-
     /**
+     * 将boolean值写入客户端，末尾带有回车换行符
      *
-     * Writes a <code>boolean</code> value to the client, 
-     * followed by a 
-     * carriage return-line feed (CRLF).
-     *
-     *
-     * @param b                       the <code>boolean</code> value 
-     *                                to write to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void println(boolean b) throws IOException {
         print(b);
         println();
     }
 
-
-
     /**
+     * 将char值写入客户端，末尾带有回车换行符
      *
-     * Writes a character to the client, followed by a carriage
-     * return-line feed (CRLF).
-     *
-     * @param c                       the character to write to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void println(char c) throws IOException {
         print(c);
         println();
     }
 
-
-
     /**
+     * 将int值写入客户端，末尾带有回车换行符
      *
-     * Writes an int to the client, followed by a 
-     * carriage return-line feed (CRLF) character.
-     *
-     *
-     * @param i                       the int to write to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void println(int i) throws IOException {
         print(i);
         println();
     }
 
-
-
-    /**  
+    /**
+     * 将long值写入客户端，末尾带有回车换行符
      *
-     * Writes a <code>long</code> value to the client, followed by a 
-     * carriage return-line feed (CRLF).
-     *
-     *
-     * @param l                       the <code>long</code> value to write to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
-     */  
-
+     * @exception IOException I/O Exception
+     */
     public void println(long l) throws IOException {
         print(l);
         println();
     }
 
-
-
     /**
+     * 将float值写入客户端，末尾带有回车换行符
      *
-     * Writes a <code>float</code> value to the client, 
-     * followed by a carriage return-line feed (CRLF).
-     *
-     * @param f                       the <code>float</code> value 
-     *                                to write to the client
-     *
-     *
-     * @exception IOException         if an input or output exception 
-     *                                occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void println(float f) throws IOException {
         print(f);
         println();
     }
 
-
-
     /**
+     * 将double值写入客户端，末尾带有回车换行符
      *
-     * Writes a <code>double</code> value to the client, 
-     * followed by a carriage return-line feed (CRLF).
-     *
-     *
-     * @param d                       the <code>double</code> value
-     *                                to write to the client
-     *
-     * @exception IOException         if an input or output exception occurred
-     *
+     * @exception IOException I/O Exception
      */
-
     public void println(double d) throws IOException {
         print(d);
         println();
     }
 
     /**
-     * This method can be used to determine if data can be written without blocking.
-     *
-     * @return <code>true</code> if a write to this <code>ServletOutputStream</code>
-     *  will succeed, otherwise returns <code>false</code>.
-     *
-     *  @since Servlet 3.1
+     * 返回数据是否可以直接被写入
      */
     public abstract boolean isReady();
 
     /**
-     * Instructs the <code>ServletOutputStream</code> to invoke the provided
-     * {@link WriteListener} when it is possible to write
+     * 当可以直接写入数据时，ServletOutputStream可以调用WriterListener
      *
-     *
-     * @param writeListener the {@link WriteListener} that should be notified
-     *  when it's possible to write
-     *
-     * @exception IllegalStateException if one of the following conditions is true
+     * @exception IllegalStateException 如果下列条件之一成立
      * <ul>
-     * <li>the associated request is neither upgraded nor the async started
-     * <li>setWriteListener is called more than once within the scope of the same request.
-     * </ul>
+     * <li> 关联的请求没有升级或者没有开启异步
+     * <li> 在相同的request范围多次调用setWriteListener
      *
-     * @throws NullPointerException if writeListener is null
-     *
-     * @since Servlet 3.1
+     * @throws NullPointerException writeListener is null
      */
     public abstract void setWriteListener(WriteListener writeListener);
 }

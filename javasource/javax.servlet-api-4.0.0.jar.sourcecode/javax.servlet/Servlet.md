@@ -42,7 +42,7 @@
 	</servlet>
 
 	<servlet-mapping><!-- 映射 -->
-		<servlet-name>FirstServelt</servlet-name>
+		<servlet-name>FirstServlet</servlet-name>
 		<url-pattern>/firstServlet</url-pattern><!--映射的地址 -->
 	</servlet-mapping>
 </web-app>
