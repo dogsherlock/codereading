@@ -21,7 +21,7 @@ public interface RequestDispatcher {
     static final String FORWARD_CONTEXT_PATH = "javax.servlet.forward.context_path";
 
     /**
-     * forward后可以通过request.getHttpServletMapping()获取上一个url映射规则
+     * forward后可以通过此属性获得原始的HttpServletMapping信息
      */
     static final String FORWARD_MAPPING = "javax.servlet.forward.mapping";
 

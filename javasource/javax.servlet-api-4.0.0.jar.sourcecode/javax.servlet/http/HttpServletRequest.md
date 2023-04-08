@@ -9,237 +9,104 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
 /**
+ * 继承javax.servlet.ServletRequest接口来为HTTP servlets提供请求信息.
+ * 
+ * 由容器创建HttpServletRequest对象并传递给Servlet的service方法
  *
- * Extends the {@link javax.servlet.ServletRequest} interface to provide
- * request information for HTTP servlets.
- *
- * <p>The servlet container creates an <code>HttpServletRequest</code>
- * object and passes it as an argument to the servlet's service
- * methods (<code>doGet</code>, <code>doPost</code>, etc).
- *
- *
- * @author 	Various
+ * HTTP1.1使用的认证方式有: BASIC认证、DIGEST认证、SSL客户端认证、FORMBASE认证
  */
-
 public interface HttpServletRequest extends ServletRequest {
 
     /**
-     * String identifier for Basic authentication. Value "BASIC"
+     * 基本认证
+     * WWW-Authenticate: Basic realm=<realm>, charset="UTF-8"
+     * Authorization: Basic <credentials>
      */
     public static final String BASIC_AUTH = "BASIC";
 
     /**
-     * String identifier for Form authentication. Value "FORM"
+     * FROM表单认证
      */
     public static final String FORM_AUTH = "FORM";
 
     /**
-     * String identifier for Client Certificate authentication. Value "CLIENT_CERT"
+     * 客户端证书认证(SSL认证)
      */
     public static final String CLIENT_CERT_AUTH = "CLIENT_CERT";
 
     /**
-     * String identifier for Digest authentication. Value "DIGEST"
+     * DIGEST认证
      */
     public static final String DIGEST_AUTH = "DIGEST";
 
     /**
-     * Returns the name of the authentication scheme used to protect
-     * the servlet. All servlet containers support basic, form and client
-     * certificate authentication, and may additionally support digest
-     * authentication.
-     * If the servlet is not authenticated <code>null</code> is returned.
+     * 返回认证类型.所有的servlet容器支持基本认证、表单认证、客户端证书认证，
+     * 也许还有附加的摘要认证.
+     * 如无需认证，则返回null.
      *
-     * <p>Same as the value of the CGI variable AUTH_TYPE.
-     *
-     * @return		one of the static members BASIC_AUTH,
-     *			FORM_AUTH, CLIENT_CERT_AUTH, DIGEST_AUTH
-     *			(suitable for == comparison) or
-     *			the container-specific string indicating
-     *			the authentication scheme, or
-     *			<code>null</code> if the request was
-     *			not authenticated.
+     * 与CGI的AUTH_TYPE类似
      */
     public String getAuthType();
 
     /**
-     * Returns an array containing all of the <code>Cookie</code>
-     * objects the client sent with this request.
-     * This method returns <code>null</code> if no cookies were sent.
-     *
-     * @return		an array of all the <code>Cookies</code>
-     *			included with this request, or <code>null</code>
-     *			if the request has no cookies
+     * 返回客户端发送的请求携带的所有cookie信息.
+     * 如果请求不含有cookie，则返回null.
      */
     public Cookie[] getCookies();
 
     /**
-     * Returns the value of the specified request header
-     * as a <code>long</code> value that represents a
-     * <code>Date</code> object. Use this method with
-     * headers that contain dates, such as
-     * <code>If-Modified-Since</code>.
+     * 返回指定请求头的值表示的日期对象的long值.
+     * 在包含日期的请求头中使用此方法，如If-Modified-Since
+     * If-Modified-Since表示服务区器只在所请求的资源在给定
+     * 的日期时间之后对内容进行过修改的情况下才会将资源返回，
+     * 否则返回304.
      *
-     * <p>The date is returned as
-     * the number of milliseconds since January 1, 1970 GMT.
-     * The header name is case insensitive.
+     * 如 If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
      *
-     * <p>If the request did not have a header of the
-     * specified name, this method returns -1. If the header
-     * can't be converted to a date, the method throws
-     * an <code>IllegalArgumentException</code>.
+     * 返回的日期会以January 1, 1970 GMT后的毫秒数返回.请求头
+     * key对大小写不敏感.
      *
-     * @param name		a <code>String</code> specifying the
-     *				name of the header
+     * 如果请求不包含指定的请求头，则此方法返回-1.如果转换
+     * 失败，则抛出IllegalArgumentException.
      *
-     * @return			a <code>long</code> value
-     *				representing the date specified
-     *				in the header expressed as
-     *				the number of milliseconds
-     *				since January 1, 1970 GMT,
-     *				or -1 if the named header
-     *				was not included with the
-     *				request
-     *
-     * @exception	IllegalArgumentException	If the header value
-     *							can't be converted
-     *							to a date
+     * @exception	IllegalArgumentException 如果请求头的值不能被转换成日期
      */
     public long getDateHeader(String name);
 
     /**
-     * Returns the value of the specified request header
-     * as a <code>String</code>. If the request did not include a header
-     * of the specified name, this method returns <code>null</code>.
-     * If there are multiple headers with the same name, this method
-     * returns the first head in the request.
-     * The header name is case insensitive. You can use
-     * this method with any request header.
-     *
-     * @param name		a <code>String</code> specifying the
-     *				header name
-     *
-     * @return			a <code>String</code> containing the
-     *				value of the requested
-     *				header, or <code>null</code>
-     *				if the request does not
-     *				have a header of that name
+     * 根据指定的请求头name(不区分大小写)返回value值.如果不存在，则返回null.
+     * 如果有多个相同name的请求头，此方法返回请求中的第一个.
      */
     public String getHeader(String name);
 
     /**
-     * Returns all the values of the specified request header
-     * as an <code>Enumeration</code> of <code>String</code> objects.
+     * 根据指定请求头name获取value的集合，如果没有，则返回空集合.
+     * 如果容器不允许访问此头信息，则返回null.
      *
-     * <p>Some headers, such as <code>Accept-Language</code> can be sent
-     * by clients as several headers each with a different value rather than
-     * sending the header as a comma separated list.
-     *
-     * <p>If the request did not include any headers
-     * of the specified name, this method returns an empty
-     * <code>Enumeration</code>.
-     * The header name is case insensitive. You can use
-     * this method with any request header.
-     *
-     * @param name		a <code>String</code> specifying the
-     *				header name
-     *
-     * @return			an <code>Enumeration</code> containing
-     *                  	the values of the requested header. If
-     *                  	the request does not have any headers of
-     *                  	that name return an empty
-     *                  	enumeration. If
-     *                  	the container does not allow access to
-     *                  	header information, return null
+     * 如客户端可以发送多个头Accept-Language，每个带有不同的值，而不是用逗号分割的列表.
      */
     public Enumeration<String> getHeaders(String name);
 
     /**
-     * Returns an enumeration of all the header names
-     * this request contains. If the request has no
-     * headers, this method returns an empty enumeration.
+     * 获取请求中包含的所有请求头name集合.如果没有，返回空集合.
      *
-     * <p>Some servlet containers do not allow
-     * servlets to access headers using this method, in
-     * which case this method returns <code>null</code>
-     *
-     * @return			an enumeration of all the
-     *				header names sent with this
-     *				request; if the request has
-     *				no headers, an empty enumeration;
-     *				if the servlet container does not
-     *				allow servlets to use this method,
-     *				<code>null</code>
+     * 一些servlet容器不允许servlet去使用此方法访问请求头，
+     * 这种情况下返回null.
      */
     public Enumeration<String> getHeaderNames();
 
     /**
-     * Returns the value of the specified request header
-     * as an <code>int</code>. If the request does not have a header
-     * of the specified name, this method returns -1. If the
-     * header cannot be converted to an integer, this method
-     * throws a <code>NumberFormatException</code>.
+     * 返回指定请求头的值(int)，如果没有，返回-1.如果此请求头不能被转换
+     * 成整型，此方法抛出NumberFormatException异常.
      *
-     * <p>The header name is case insensitive.
-     *
-     * @param name		a <code>String</code> specifying the name
-     *				of a request header
-     *
-     * @return			an integer expressing the value
-     * 				of the request header or -1
-     *				if the request doesn't have a
-     *				header of this name
-     *
-     * @exception	NumberFormatException		If the header value
-     *							can't be converted
-     *							to an <code>int</code>
+     * @exception	NumberFormatException 请求头值不能转换为整型	
      */
     public int getIntHeader(String name);
 
     /**
-     * <p>Return the {@link HttpServletMapping} by which the {@link
-     * HttpServlet} for this {@code HttpServletRequest} was invoked.
-     * The mappings for any applicable {@link javax.servlet.Filter}s are
-     * not indicated in the result.  If the currently active {@link
-     * javax.servlet.Servlet} invocation was obtained by a call to
-     * {@link ServletRequest#getRequestDispatcher} followed by a call to
-     * {@link RequestDispatcher#forward}, the returned {@code
-     * HttpServletMapping} is the one corresponding to the path used to
-     * obtain the {@link RequestDispatcher}.  If the currently active
-     * {@code Servlet} invocation was obtained by a call to {@link
-     * ServletRequest#getRequestDispatcher} followed by a call to {@link
-     * RequestDispatcher#include}, the returned {@code
-     * HttpServletMapping} is the one corresponding to the path that
-     * caused the first {@code Servlet} in the invocation sequence to be
-     * invoked.  If the currently active {@code Servlet} invocation was
-     * obtained by a call to {@link
-     * javax.servlet.AsyncContext#dispatch}, the returned {@code
-     * HttpServletMapping} is the one corresponding to the path that
-     * caused the first {@code Servlet} in the invocation sequence to be
-     * invoked.  See {@link
-     * javax.servlet.RequestDispatcher#FORWARD_MAPPING}, {@link
-     * javax.servlet.RequestDispatcher#INCLUDE_MAPPING} and {@link
-     * javax.servlet.AsyncContext#ASYNC_MAPPING} for additional request
-     * attributes related to {@code HttpServletMapping}. If the
-     * currently active {@code Servlet} invocation was obtained by a
-     * call to {@link javax.servlet.ServletContext#getNamedDispatcher},
-     * the returned {@code HttpServletMapping} is the one corresponding
-     * to the path for the mapping last applied to this request.</p>
-     * 
-     * <p>The returned object is immutable.  Servlet 4.0 compliant
-     * implementations must override this method.</p>
-     * 
-     * @implSpec The default implementation returns a {@code
-     * HttpServletMapping} that returns the empty string for the match
-     * value, pattern and servlet name and {@code null} for the match
-     * type.
-     *
-     * @return An instance of {@code HttpServletMapping} describing the manner in which
-     * the current request was invoked.
-     * 
-     * @since 4.0
+     * 返回可以在运行时动态发现Servlet的URL映射信息
+     * 遵循servlet4.0的实现必须重写此方法，返回的对象是不可变的.
      */
-    
     default public HttpServletMapping getHttpServletMapping() {
         return new HttpServletMapping() {
             @Override
@@ -270,196 +137,97 @@ public interface HttpServletRequest extends ServletRequest {
                         + "} HttpServletRequest {" + HttpServletRequest.this.toString()
                         + '}';
             }
-            
-            
-            
         };
     }
     
     /**
-     * Returns the name of the HTTP method with which this
-     * request was made, for example, GET, POST, or PUT.
-     * Same as the value of the CGI variable REQUEST_METHOD.
-     *
-     * @return			a <code>String</code>
-     *				specifying the name
-     *				of the method with which
-     *				this request was made
+     * 返回请求方法.与CGI变量REQUEST_METHOD相同.
+     * 如GET、POST、PUT等.
      */
     public String getMethod();
 
     /**
-     * Returns any extra path information associated with
-     * the URL the client sent when it made this request.
-     * The extra path information follows the servlet path
-     * but precedes the query string and will start with
-     * a "/" character.
+     * 返回与客户端发出此请求时发送的URL相关联的额外的路径信息.
+     * 额外的路径信息在servlet路径之后，位于查询字符串之前，以"/"开头.
      *
-     * <p>This method returns <code>null</code> if there
-     * was no extra path information.
-     *
-     * <p>Same as the value of the CGI variable PATH_INFO.
-     *
-     * @return		a <code>String</code>, decoded by the
-     *			web container, specifying
-     *			extra path information that comes
-     *			after the servlet path but before
-     *			the query string in the request URL;
-     *			or <code>null</code> if the URL does not have
-     *			any extra path information
+     * 如果没有额外的路径信息，则返回null.
+     * 例如：url-pattern配置为/demo/*，请求URL为
+     * http://localhost/pro/demo/htm/index.html，则pathInfo为/htm/index.html.
+     * 
+     * 与CGI变量PATH_INFO相同.
      */
     public String getPathInfo();
 
     /**
-     * Returns any extra path information after the servlet name
-     * but before the query string, and translates it to a real
-     * path. Same as the value of the CGI variable PATH_TRANSLATED.
+     * 返回servlet路径之后查询字符串之前的额外路径转换后的真实路径.
+     * 与CGI变量PATH_TRANSLATED相同.
      *
-     * <p>If the URL does not have any extra path information,
-     * this method returns <code>null</code> or the servlet container
-     * cannot translate the virtual path to a real path for any reason
-     * (such as when the web application is executed from an archive).
+     * 如果没有额外的路径信息或servlet容器不能将虚拟路径转化为真实路径，
+     * 返回null.
      *
-     * The web container does not decode this string.
-     *
-     * @return		a <code>String</code> specifying the
-     *			real path, or <code>null</code> if
-     *			the URL does not have any extra path
-     *			information
+     * web容器不会解码此字符串.
      */
     public String getPathTranslated();
 
     /**
-     * Instantiates a new instance of {@link PushBuilder} for issuing server
-     * push responses from the current request. This method returns null
-     * if the current connection does not support server push, or server
-     * push has been disabled by the client via a
-     * {@code SETTINGS_ENABLE_PUSH} settings frame value of {@code 0} (zero).
-     *
-     * @implSpec
-     * The default implementation returns null.
-     *
-     * @return a {@link PushBuilder} for issuing server push responses
-     * from the current request, or null if push is not supported
-     *
-     * @since Servlet 4.0
+     * 实例化PushBuilder对象用于服务器向当前请求推送响应.如果当前连接
+     * 不支持服务端推送，或者客户端通过settings帧SETTINGS_ENABLE_PUSH
+     * 设置为0禁用服务端推送，则此方法返回null.
      */
      default public PushBuilder newPushBuilder() {
          return null;
      }
 
     /**
-     * Returns the portion of the request URI that indicates the context
-     * of the request. The context path always comes first in a request
-     * URI. The path starts with a "/" character but does not end with a "/"
-     * character. For servlets in the default (root) context, this method
-     * returns "". The container does not decode this string.
-     *
-     * <p>It is possible that a servlet container may match a context by
-     * more than one context path. In such cases this method will return the
-     * actual context path used by the request and it may differ from the
-     * path returned by the
-     * {@link javax.servlet.ServletContext#getContextPath()} method.
-     * The context path returned by
-     * {@link javax.servlet.ServletContext#getContextPath()}
-     * should be considered as the prime or preferred context path of the
-     * application.
-     *
-     * @return		a <code>String</code> specifying the
-     *			portion of the request URI that indicates the context
-     *			of the request
-     *
-     * @see javax.servlet.ServletContext#getContextPath()
+     * 返回项目根路径.
+     * 例如：url-pattern配置为/demo/*，请求URL为
+     * http://localhost/pro/demo/htm/index.html，则contextPath为/demo.
+     * 上下文路径以"/"但不以"/"结尾.对于默认上下文的servlet，此方法返回"".
+     * 容器不会解码此字符串.
+     * 
+     * 一个servlet容器可能一个上下文匹配多个上下文路径.此时此方法将会返回
+     * 被请求使用的实际上下文路径，可能与javax.servlet.ServletContext#getContextPath
+     * 返回的路径不同.
+     * 
+     * javax.servlet.ServletContext#getContextPath返回的上下文路径应该是被视作
+     * 此应用首要的或偏好的上下文路径.
      */
     public String getContextPath();
 
     /**
-     * Returns the query string that is contained in the request
-     * URL after the path. This method returns <code>null</code>
-     * if the URL does not have a query string. Same as the value
-     * of the CGI variable QUERY_STRING.
-     *
-     * @return		a <code>String</code> containing the query
-     *			string or <code>null</code> if the URL
-     *			contains no query string. The value is not
-     *			decoded by the container.
+     * 返回请求URL中的查询字符串.如果没有，返回null.与CGI变量QUERY_STRING相同.
      */
     public String getQueryString();
 
     /**
-     * Returns the login of the user making this request, if the
-     * user has been authenticated, or <code>null</code> if the user
-     * has not been authenticated.
-     * Whether the user name is sent with each subsequent request
-     * depends on the browser and type of authentication. Same as the
-     * value of the CGI variable REMOTE_USER.
-     *
-     * @return		a <code>String</code> specifying the login
-     *			of the user making this request, or <code>null</code>
-     *			if the user login is not known
+     * 如果已经验证过用户，则返回发出此请求的用户的登录信息.如果用户没有
+     * 经过验证，则返回null. 用户名是否随每个后续请求发送取决于浏览器和验证类型，
+     * 返回的值与CGI变量REMOTE_USER的值相同.
      */
     public String getRemoteUser();
 
     /**
-     * Returns a boolean indicating whether the authenticated user is included
-     * in the specified logical "role".  Roles and role membership can be
-     * defined using deployment descriptors.  If the user has not been
-     * authenticated, the method returns <code>false</code>.
+     * 检查指定的逻辑"角色"中是否包含经过验证的用户.角色和角色成员关系可以使用
+     * 部署描述符定义.如果用户没有经过验证，此方法返回false.
      *
-     * <p>The role name "*" should never be used as an argument in calling
-     * <code>isUserInRole</code>. Any call to <code>isUserInRole</code> with
-     * "*" must return false.
-     * If the role-name of the security-role to be tested is "**", and
-     * the application has NOT declared an application security-role with
-     * role-name "**", <code>isUserInRole</code> must only return true if
-     * the user has been authenticated; that is, only when
-     * {@link #getRemoteUser} and {@link #getUserPrincipal} would both return
-     * a non-null value. Otherwise, the container must check
-     * the user for membership in the application role.
-     *
-     * @param role		a <code>String</code> specifying the name
-     *				of the role
-     *
-     * @return		a <code>boolean</code> indicating whether
-     *			the user making this request belongs to a given role;
-     *			<code>false</code> if the user has not been
-     *			authenticated
+     * 不要使用*作为isUserInRole的参数，否则返回false.
      */
     public boolean isUserInRole(String role);
 
     /**
-     * Returns a <code>java.security.Principal</code> object containing
-     * the name of the current authenticated user. If the user has not been
-     * authenticated, the method returns <code>null</code>.
-     *
-     * @return		a <code>java.security.Principal</code> containing
-     *			the name of the user making this request;
-     *			<code>null</code> if the user has not been
-     *			authenticated
+     * 返回包含当前请求对应的已经验证过的用户的名称的java.security.Principal
+     * 对象如果用户没有经过验证，则该方法返回null.
      */
     public java.security.Principal getUserPrincipal();
 
     /**
-     * Returns the session ID specified by the client. This may
-     * not be the same as the ID of the current valid session
-     * for this request.
-     * If the client did not specify a session ID, this method returns
-     * <code>null</code>.
-     *
-     * @return		a <code>String</code> specifying the session
-     *			ID, or <code>null</code> if the request did
-     *			not specify a session ID
-     *
-     * @see     #isRequestedSessionIdValid
+     * 获取标示客户端的sessionid.可能与此请求当前的有效session不同.
      */
     public String getRequestedSessionId();
 
     /**
-     * Returns the part of this request's URL from the protocol
-     * name up to the query string in the first line of the HTTP request.
-     * The web container does not decode this String.
+     * 返回HTTP请求行中的URL，不包括查询字符.
      * For example:
-     *
      * <table summary="Examples of Returned Values">
      * <tr align=left><th>First line of HTTP request      </th>
      * <th>     Returned Value</th>
@@ -468,387 +236,196 @@ public interface HttpServletRequest extends ServletRequest {
      * <td><td>/a.html
      * <tr><td>HEAD /xyz?a=b HTTP/1.1<td><td>/xyz
      * </table>
-     *
-     * <p>To reconstruct an URL with a scheme and host, use
-     * {@link HttpUtils#getRequestURL}.
-     *
-     * @return		a <code>String</code> containing
-     *			the part of the URL from the
-     *			protocol name up to the query string
-     *
-     * @see     HttpUtils#getRequestURL
      */
     public String getRequestURI();
 
     /**
-     * Reconstructs the URL the client used to make the request.
-     * The returned URL contains a protocol, server name, port
-     * number, and server path, but it does not include query
-     * string parameters.
+     * 请求URL的地址，包含协议、主机名、端口号和服务器路径，但不包括查询字符串.
      *
-     * <p>If this request has been forwarded using
-     * {@link javax.servlet.RequestDispatcher#forward}, the server path in the
-     * reconstructed URL must reflect the path used to obtain the
-     * RequestDispatcher, and not the server path specified by the client.
+     * 如果使用过javax.servlet.RequestDispatcher#forward转发此请求，服务器路径
+     * 必须反应获得RequestDispatcher对象的路径，而不是客户端指定的服务器路径.
      *
-     * <p>Because this method returns a <code>StringBuffer</code>,
-     * not a string, you can modify the URL easily, for example,
-     * to append query parameters.
+     * 为了便于修改URL，返回StringBuffer类型而不是String类型
      *
-     * <p>This method is useful for creating redirect messages
-     * and for reporting errors.
-     *
-     * @return		a <code>StringBuffer</code> object containing
-     *			the reconstructed URL
+     * 在创建重定向信息和错误报告上，此方法很有用.
      */
     public StringBuffer getRequestURL();
 
     /**
-     * Returns the part of this request's URL that calls
-     * the servlet. This path starts with a "/" character
-     * and includes either the servlet name or a path to
-     * the servlet, but does not include any extra path
-     * information or a query string. Same as the value of
-     * the CGI variable SCRIPT_NAME.
-     *
-     * <p>This method will return an empty string ("") if the
-     * servlet used to process this request was matched using
-     * the "/*" pattern.
-     *
-     * @return		a <code>String</code> containing
-     *			the name or path of the servlet being
-     *			called, as specified in the request URL,
-     *			decoded, or an empty string if the servlet
-     *			used to process the request is matched
-     *			using the "/*" pattern.
+     * 返回请求的URL中调用servlet的部分.此路径以"/"开始，要么
+     * 包含servlet名或者通往servlet的路径，并且不包含查询字符串等
+     * 额外的信息.与CGI变量SCRIPT_NAME相同.
+     * 其实真是的意思就是，在配置webx.xml或编程式配置时，配置了url-pattern，
+     * 请求的URL与url-pattern的有效部分重合部分就是servletPath，
+     * 
+     * 例如：url-pattern配置为/demo/*，请求URL为
+     * http://localhost/pro/demo/htm/index.html，则servletPath为/demo.
+     * 如果url-pattern为/*，则此方法返回空字符串.
      */
     public String getServletPath();
 
     /**
-     * Returns the current <code>HttpSession</code>
-     * associated with this request or, if there is no
-     * current session and <code>create</code> is true, returns
-     * a new session.
-     *
-     * <p>If <code>create</code> is <code>false</code>
-     * and the request has no valid <code>HttpSession</code>,
-     * this method returns <code>null</code>.
-     *
-     * <p>To make sure the session is properly maintained,
-     * you must call this method before
-     * the response is committed. If the container is using cookies
-     * to maintain session integrity and is asked to create a new session
-     * when the response is committed, an IllegalStateException is thrown.
-     *
-     * @param create	<code>true</code> to create
-     *			a new session for this request if necessary;
-     *			<code>false</code> to return <code>null</code>
-     *			if there's no current session
-     *
-     * @return 		the <code>HttpSession</code> associated
-     *			with this request or <code>null</code> if
-     * 			<code>create</code> is <code>false</code>
-     *			and the request has no valid session
-     *
-     * @see #getSession()
+     * 返回请求对应的当前的session.
+     * 在没有session的情况下:
+     * create=true，则创建一个新的session.
+     * create=false,则不创建session，返回null.
      */
     public HttpSession getSession(boolean create);
 
     /**
-     * Returns the current session associated with this request,
-     * or if the request does not have a session, creates one.
-     *
-     * @return		the <code>HttpSession</code> associated
-     *			with this request
-     *
-     * @see	#getSession(boolean)
+     * 返回于此请求关联的session，如果没有则创建一个.
      */
     public HttpSession getSession();
 
     /**
-     * Change the session id of the current session associated with this
-     * request and return the new session id.
+     * 改变与当前请求关联的session的id，并返回新的session id.
      *
-     * @return the new session id
-     *
-     * @throws IllegalStateException if there is no session associated
-     * with the request
-     *
-     * @since Servlet 3.1
+     * @throws IllegalStateException 此请求没有关联的session
      */
     public String changeSessionId();
 
     /**
-     * Checks whether the requested session ID is still valid.
-     *
-     * <p>If the client did not specify any session ID, this method returns
-     * <code>false</code>.
-     *
-     * @return			<code>true</code> if this
-     *				request has an id for a valid session
-     *				in the current session context;
-     *				<code>false</code> otherwise
-     *
-     * @see			#getRequestedSessionId
-     * @see			#getSession
-     * @see			HttpSessionContext
+     * 检查sessionid是否有效.如果客户端没有进行指定sessionID，则此方法返回false.
      */
     public boolean isRequestedSessionIdValid();
 
     /**
-     * <p>Checks whether the requested session ID was conveyed to the
-     * server as an HTTP cookie.</p>
-     *
-     * @return			<code>true</code> if the session ID
-     *				was conveyed to the server an an HTTP
-     *				cookie; otherwise, <code>false</code>
-     *
-     * @see         #getSession
+     * 检查sessionid是否从cookie中获得.
      */
     public boolean isRequestedSessionIdFromCookie();
 
     /**
-     * <p>Checks whether the requested session ID was conveyed to the
-     * server as part of the request URL.</p>
-     *
-     * @return <code>true</code> if the session ID was conveyed to the
-     *				server as part of a URL; otherwise,
-     *				<code>false</code>
-     *
-     * @see         #getSession
+     * 检查sessionid是否从URL中获得.
      */
     public boolean isRequestedSessionIdFromURL();
 
     /**
-     * @deprecated		As of Version 2.1 of the Java Servlet
+     * @deprecated As of Version 2.1 of the Java Servlet
      *				API, use {@link #isRequestedSessionIdFromURL}
      *				instead.
-     *
-     * @return <code>true</code> if the session ID was conveyed to the
-     *				server as part of a URL; otherwise,
-     *				<code>false</code>
      */
     @Deprecated
     public boolean isRequestedSessionIdFromUrl();
 
     /**
-     * Use the container login mechanism configured for the
-     * <code>ServletContext</code> to authenticate the user making
-     * this request.
+     * 使用为ServletContext配置的容器登录机制来认证发起此请求
+     * 的用户. 此方法可能修改和提交参数HttpServletResponse对象.
      *
-     * <p>This method may modify and commit the argument
-     * <code>HttpServletResponse</code>.
+     * @throws IOException 从此request读取或给定的response写入发生I/O错误.
      *
-     * @param response The <code>HttpServletResponse</code>
-     * associated with this <code>HttpServletRequest</code>
+     * @throws IllegalStateException 如果登录机制试图在response提交之后修改此
+     * response.
      *
-     * @return <code>true</code> when non-null values were or have been
-     * established as the values returned by <code>getUserPrincipal</code>,
-     * <code>getRemoteUser</code>, and <code>getAuthType</code>. Return
-     * <code>false</code> if authentication is incomplete and the underlying
-     * login mechanism has committed, in the response, the message (e.g.,
-     * challenge) and HTTP status code to be returned to the user.
-     *
-     * @throws IOException if an input or output error occurred while
-     * reading from this request or writing to the given response
-     *
-     * @throws IllegalStateException if the login mechanism attempted to
-     * modify the response and it was already committed
-     *
-     * @throws ServletException if the authentication failed and
-     * the caller is responsible for handling the error (i.e., the
-     * underlying login mechanism did NOT establish the message and
-     * HTTP status code to be returned to the user)
-     *
-     * @since Servlet 3.0
+     * @throws ServletException 验证失败，调用者负责处理错误(即，底层登录机制没有
+     * 建立内容和http状态码来返回给用户)
      */
     public boolean authenticate(HttpServletResponse response)
 	throws IOException,ServletException;
 
     /**
-     * Validate the provided username and password in the password validation
-     * realm used by the web container login mechanism configured for the
-     * <code>ServletContext</code>.
+     * 为ServletContext配置的web容器登陆机制验证参数username和password
      *
-     * <p>This method returns without throwing a <code>ServletException</code>
-     * when the login mechanism configured for the <code>ServletContext</code>
-     * supports username password validation, and when, at the time of the
-     * call to login, the identity of the caller of the request had
-     * not been established (i.e, all of <code>getUserPrincipal</code>,
-     * <code>getRemoteUser</code>, and <code>getAuthType</code> return null),
-     * and when validation of the provided credentials is successful.
-     * Otherwise, this method throws a <code>ServletException</code> as
-     * described below.
-     *
-     * <p>When this method returns without throwing an exception, it must
-     * have established non-null values as the values returned by
-     * <code>getUserPrincipal</code>, <code>getRemoteUser</code>, and
-     * <code>getAuthType</code>.
-     *
-     * @param username The <code>String</code> value corresponding to
-     * the login identifier of the user.
-     *
-     * @param password The password <code>String</code> corresponding
-     * to the identified user.
-     *
-     * @exception	ServletException    if the configured login mechanism
-     *                                      does not support username
-     *                                      password authentication, or if a
-     *                                      non-null caller identity had
-     *                                      already been established (prior
-     *                                      to the call to login), or if
-     *                                      validation of the provided
-     *                                      username and password fails.
-     *
-     * @since Servlet 3.0
+     * @exception	ServletException 如果配置的登录机制不支持用户名和密码验证
+     * ，或已经建立，或验证失败.
      */
     public void login(String username, String password)
 	throws ServletException;
 
     /**
-     * Establish <code>null</code> as the value returned when
-     * <code>getUserPrincipal</code>, <code>getRemoteUser</code>,
-     * and <code>getAuthType</code> is called on the request.
+     * 退出登录.
+     * 将在此请求上调用的getUserPrincipal、getRemoteUser、getAuthType
+     * 返回的值设置为null.
      *
-     * @exception ServletException if logout fails
-     *
-     * @since Servlet 3.0
+     * @exception ServletException 退出登录失败.
      */
     public void logout() throws ServletException;
 
     /**
-     * Gets all the {@link Part} components of this request, provided
-     * that it is of type <code>multipart/form-data</code>.
+     * 获取请求中所有的part部分，类型是multipart/form-data.
+     * 也就是Content-Disposition通用标头对应的multipart消息体
+     * 的子部分中.
      *
-     * <p>If this request is of type <code>multipart/form-data</code>, but
-     * does not contain any <code>Part</code> components, the returned
-     * <code>Collection</code> will be empty.
+     * 如果请求是multipart/form-data类型，但不包含任何part部分，则返回空的
+     * Collection.
      *
-     * <p>Any changes to the returned <code>Collection</code> must not
-     * affect this <code>HttpServletRequest</code>.
+     * 任何对返回的Collection的修改不会影响HttpServletRequest obj.
      *
-     * @return a (possibly empty) <code>Collection</code> of the
-     * <code>Part</code> components of this request
+     * @throws IOException 在提取请求的part部分时出现I/O错误.
      *
-     * @throws IOException if an I/O error occurred during the retrieval
-     * of the {@link Part} components of this request
+     * @throws ServletException 如果请求类型不是multipart/form-data
      *
-     * @throws ServletException if this request is not of type
-     * <code>multipart/form-data</code>
-     *
-     * @throws IllegalStateException if the request body is larger than
-     * <code>maxRequestSize</code>, or any <code>Part</code> in the
-     * request is larger than <code>maxFileSize</code>, or there is no
-     * <code>@MultipartConfig</code> or <code>multipart-config</code> in
-     * deployment descriptors
-     *
-     * @see javax.servlet.annotation.MultipartConfig#maxFileSize
-     * @see javax.servlet.annotation.MultipartConfig#maxRequestSize
-     *
-     * @since Servlet 3.0
+     * @throws IllegalStateException 如果请求体大于maxRequestSize，或者
+     * 请求中的任何part部分大于maxFileSize，或者部署描述符中没有
+     * @MultipartConfig或multipart-config
      */
     public Collection<Part> getParts() throws IOException, ServletException;
 
     /**
-     * Gets the {@link Part} with the given name.
+     * 获取指定名字的part
+     * 如Content-Disposition: form-data; name="fieldName"; filename="filename.jpg"
+     * 中的name参数来标识相关part.
      *
-     * @param name the name of the requested <code>Part</code>
-     *
-     * @return The <code>Part</code> with the given name, or
-     * <code>null</code> if this request is of type
-     * <code>multipart/form-data</code>, but does not
-     * contain the requested <code>Part</code>
-     *
-     * @throws IOException if an I/O error occurred during the retrieval
-     * of the requested <code>Part</code>
-     * @throws ServletException if this request is not of type
-     * <code>multipart/form-data</code>
-     * @throws IllegalStateException if the request body is larger than
-     * <code>maxRequestSize</code>, or any <code>Part</code> in the
-     * request is larger than <code>maxFileSize</code>, or there is no
-     * <code>@MultipartConfig</code> or <code>multipart-config</code> in
-     * deployment descriptors
-     *
-     * @see javax.servlet.annotation.MultipartConfig#maxFileSize
-     * @see javax.servlet.annotation.MultipartConfig#maxRequestSize
-     *
-     * @since Servlet 3.0
+     * @throws IOException 提取请求对象的part部分发生I/O错误
+
+     * @throws ServletException 请求类型不是multipart/form-data
+     * 
+     * @throws IllegalStateException 如果请求体大于maxRequestSize，或者
+     * 请求中的任何part部分大于maxFileSize，或者部署描述符中没有
+     * @MultipartConfig或multipart-config
      */
     public Part getPart(String name) throws IOException, ServletException;
 
     /**
-     * Creates an instance of <code>HttpUpgradeHandler</code> for a given
-     * class and uses it for the http protocol upgrade processing.
+     * 根据参数handlerClass创建HttpUpgradeHandler实例，并用于http协议升级处理.
      *
-     * @param <T> The {@code Class}, which extends {@link
-     * HttpUpgradeHandler}, of the {@code handlerClass}.
-
-     * @param handlerClass The <code>HttpUpgradeHandler</code> class used for the upgrade.
+     * @exception IOException 协议升级发生I/O错误
      *
-     * @return an instance of the <code>HttpUpgradeHandler</code>
-     *
-     * @exception IOException if an I/O error occurred during the upgrade
-     * @exception ServletException if the given <code>handlerClass</code> fails to
-     * be instantiated
-     *
-     * @see javax.servlet.http.HttpUpgradeHandler
-     * @see javax.servlet.http.WebConnection
-     *
-     * @since Servlet 3.1
+     * @exception ServletException 给定参数handlerClass实例化失败
      */
     public <T extends HttpUpgradeHandler> T  upgrade(Class<T> handlerClass)
         throws IOException, ServletException;
 
     /**
-     * Get the request trailer fields.
-     *
-     * <p>The returned map is not backed by the {@code HttpServletRequest} object,
-     * so changes in the returned map are not reflected in the
-     * {@code HttpServletRequest} object, and vice-versa.</p>
+     * Trailer是一个响应首部，允许发送方在分块发送的消息后面添加额外的元信息.
+     * 如: 
+     * HTTP/1.1 200 OK
+     * Content-Type: text/plain
+     * Transfer-Encoding: chunked
+     * Trailer: Expires
+
+     * 7\r\n
+     * Mozilla\r\n
+     * 9\r\n
+     * Developer\r\n
+     * 7\r\n
+     * Network\r\n
+     * 0\r\n
+     * Expires: Wed, 21 Oct 2015 07:28:00 GMT\r\n
+     * \r\n
      * 
-     * <p>{@link #isTrailerFieldsReady()} should be called first to determine
-     * if it is safe to call this method without causing an exception.</p>
-     *
-     * @implSpec
-     * The default implementation returns an empty map.
+     * 获取request trailer字段，修改HttpServletRequest对象和返回的map不会互相影响.
      * 
-     * @return A map of trailer fields in which all the keys are in lowercase,
-     * regardless of the case they had at the protocol level. If there are no
-     * trailer fields, yet {@link #isTrailerFieldsReady} is returning true,
-     * the empty map is returned.
+     * 要先调用#isTrailerFieldsReady方法来确保可以安全调用此方法，不会造成异常.
+     * 
+     * @return 返回trailer字段的map，所有的key是小写的.如果没有trailer字段，
+     * #isTrailerFiledsReady返回true，返回空map.
      *
-     * @throws IllegalStateException if {@link #isTrailerFieldsReady()} is false
-     *
-     * @since Servlet 4.0
+     * @throws IllegalStateException #isTrailerFieldsReady返回false
      */
     default public Map<String, String> getTrailerFields() {
         return Collections.emptyMap();
     }
 
     /**
-     * Return a boolean indicating whether trailer fields are ready to read
-     * using {@link #getTrailerFields}.
+     * 返回是否可以是使用#getTrailerFields来读取trailer字段.
      *
-     * This methods returns true immediately if it is known that there is no
-     * trailer in the request, for instance, the underlying protocol (such
-     * as HTTP 1.0) does not supports the trailer fields, or the request is
-     * not in chunked encoding in HTTP 1.1.
-     * And the method also returns true if both of the following conditions
-     * are satisfied:
+     * 如果请求中没有trailer，则立即返回true，如底层协议不支持trailer字段(只有HTTP1.1支持)，
+     * 或者请求不是分块传输(Transfer-Encoding: chunked).
+     * 如果以下两个条件都满足，则返回true.
      * <ol type="a">
-     *   <li> the application has read all the request data and an EOF
-     *        indication has been returned from the {@link #getReader}
-     *        or {@link #getInputStream}.
-     *   <li> all the trailer fields sent by the client have been received.
-     *        Note that it is possible that the client has sent no trailer fields.
+     *   <li> 应用已经读取了所有的请求数据(#getReader/#getInputStream)，并且读取到了文件结尾(EOF).
+     *   <li> 所有被客户端发送的trailer字段都被接受到了(可能没有发送)
      * </ol>
-     *
-     * @implSpec
-     * The default implementation returns false.
-     *
-     * @return a boolean whether trailer fields are ready to read
-     *
-     * @since Servlet 4.0
      */
     default public boolean isTrailerFieldsReady() {
         return true;

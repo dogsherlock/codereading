@@ -1,4 +1,12 @@
 ##### javax.servlet.http.Cookie
+**HTTP State Management Mechanism**
+* [netscape cookie spec](https://www.rfc-editor.org/rfc/rfc6265#ref-Netscape)
+* [rfc2109](https://www.rfc-editor.org/rfc/rfc2109)
+* [rfc2965](https://www.rfc-editor.org/rfc/rfc2965)
+* [rfc6265](https://www.rfc-editor.org/rfc/rfc6265)
+
+___
+
 ```java
 package javax.servlet.http;
 
@@ -8,53 +16,49 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- *
- * Creates a cookie, a small amount of information sent by a servlet to 
- * a Web browser, saved by the browser, and later sent back to the server.
- * A cookie's value can uniquely 
- * identify a client, so cookies are commonly used for session management.
+ * 创建一个cookie，Servlet发送少量的数据到web浏览器，由浏览器保存，稍后
+ * 发送回服务器.
+ * cookie的值可以唯一标识客户端，所以cookie通常用于会话管理.
  * 
- * <p>A cookie has a name, a single value, and optional attributes
- * such as a comment, path and domain qualifiers, a maximum age, and a
- * version number. Some Web browsers have bugs in how they handle the 
- * optional attributes, so use them sparingly to improve the interoperability 
- * of your servlets.
+ * cookie有一个name/value和可选属性(如注释，Cookie的路径作用域，domain作用域，
+ * cookie有效时间，版本号version0/version1).一些web浏览器在处理可选属性的方式
+ * 上存在缺陷，因此要谨慎使用它们来提供servlet的互操作性.
  *
- * <p>The servlet sends cookies to the browser by using the
- * {@link HttpServletResponse#addCookie} method, which adds
- * fields to HTTP response headers to send cookies to the 
- * browser, one at a time. The browser is expected to 
- * support 20 cookies for each Web server, 300 cookies total, and
- * may limit cookie size to 4 KB each.
+ * servlet使用HttpServletResponse#addCookie方法将cookie发送到浏览器，
+ * 该方法向Http响应头添加字段Set-Cookie字段，以便一次发送一个cookie
+ * 到浏览器.浏览器预计支持每个web服务器20个cookie，总共300个cookie，
+ * 并且每个cookie大小限制为4kb.
+ * 浏览器通过向HTTP请求头添加字段Cookie将cookies返回给servlet.可以使用
+ * HttpServletRequest#getCookies方法获取请求中的cookies.多个cookie也许
+ * 可能有相同的name,但路径属性不同.
  * 
- * <p>The browser returns cookies to the servlet by adding 
- * fields to HTTP request headers. Cookies can be retrieved
- * from a request by using the {@link HttpServletRequest#getCookies} method.
- * Several cookies might have the same name but different path attributes.
- * 
- * <p>Cookies affect the caching of the Web pages that use them. 
- * HTTP 1.0 does not cache pages that use cookies created with
- * this class. This class does not support the cache control
- * defined with HTTP 1.1.
+ * cookie会影响使用它们的网页的缓存，HTTP1.0不缓存使用此类创建的cookie的页面，
+ * 此类不支持HTTP1.1定义的缓存控制(Cache-Control头).
  *
- * <p>This class supports both the Version 0 (by Netscape) and Version 1 
- * (by RFC 2109) cookie specifications. By default, cookies are
- * created using Version 0 to ensure the best interoperability.
- *
- * @author	Various
+ * 此类同时支持version0(netscape)和version1(rfc 2109)的cookie规范.默认情况下，
+ * cookie使用version0创建的，以确保最佳互操作性.
  */
 public class Cookie implements Cloneable, Serializable {
-
+    /**
+     * implements Serializable
+     */ 
     private static final long serialVersionUID = -6454587001725327448L;
-
+    
     private static final String TSPECIALS;
 
+    /**
+     * base name of resource bundle
+     */
     private static final String LSTRING_FILE =
         "javax.servlet.http.LocalStrings";
 
+    /**
+     * 错误信息国际化
+     */
     private static ResourceBundle lStrings =
         ResourceBundle.getBundle(LSTRING_FILE);
 
+    // 类加载后初始化TSPECIALS
     static {
         if (Boolean.valueOf(System.getProperty("org.glassfish.web.rfc2109_cookie_names_enforced", "true"))) {
             TSPECIALS = "/()<>@,;:\\\"[]?={} \t";
@@ -63,68 +67,83 @@ public class Cookie implements Cloneable, Serializable {
         }
     }
     
-    //
-    // The value of the cookie itself.
-    //
-    
-    private String name;	// NAME= ... "$Name" style is reserved
-    private String value;	// value of NAME
+    /**
+     * cookie name
+     */
+    private String name;
 
-    //
-    // Attributes encoded in the header's cookie fields.
-    //
-    
-    private String comment;	// ;Comment=VALUE ... describes cookie's use
-				// ;Discard ... implied by maxAge < 0
-    private String domain;	// ;Domain=VALUE ... domain that sees cookie
-    private int maxAge = -1;	// ;Max-Age=VALUE ... cookies auto-expire
-    private String path;	// ;Path=VALUE ... URLs that see the cookie
-    private boolean secure;	// ;Secure ... e.g. use SSL
-    private int version = 0;	// ;Version=1 ... means RFC 2109++ style
+    /**
+     * cookie value
+     */
+    private String value;
+
+    /**
+     * 可选，描述cookies的用途
+     */
+    private String comment;
+
+    /**
+     * cookie在指定domain下有效,如果指定了domain，则一般包含子域名.
+     * 如果不指定，该属性默认为同一host设置cookie
+     */
+    private String domain;
+
+    /**
+     * Max-Age=delta-seconds. cookie的存活时间(delta-seconds之后)
+     */
+    private int maxAge = -1;
+
+    /**
+     * cookie生效所在的URL子集
+     */
+    private String path;
+
+    /**
+     * Secure没有value，表示使用SSL等安全协议
+     */
+    private boolean secure;
+
+    /**
+     * cookie遵循的状态管理spec，version1表示遵循rfc 2109++风格
+     */
+    private int version = 0;
+
+    /**
+     * js脚本无法读取到cookie信息(document.cookie，可以缓解xss攻击窃取cookie内容)
+     */
     private boolean isHttpOnly = false;
 
     /**
-     * Constructs a cookie with the specified name and value.
+     * 用给定的name和value构造一个cookie obj.
      *
-     * <p>The name must conform to RFC 2109. However, vendors may
-     * provide a configuration option that allows cookie names conforming
-     * to the original Netscape Cookie Specification to be accepted.
+     * name必须遵循RFC2109规范(以$开头的name被保留做其他用途，不能被应用使用；
+     * value必须是可打印的ASCII编码，具体见rfc2109 spec)，然而厂商可能会提供
+     * 配置选项来允许cookie遵循最初的netscape的cookie规范.当cookie被创建，
+     * 不能修改cookie的name.可以通过#setValue来改变cookie的value.
      *
-     * <p>The name of a cookie cannot be changed once the cookie has
-     * been created.
-     *
-     * <p>The value can be anything the server chooses to send. Its
-     * value is probably of interest only to the server. The cookie's
-     * value can be changed after creation with the
-     * <code>setValue</code> method.
-     *
-     * <p>By default, cookies are created according to the Netscape
-     * cookie specification. The version can be changed with the 
-     * <code>setVersion</code> method.
-     *
-     * @param name the name of the cookie
-     *
-     * @param value the value of the cookie
-     *
-     * @throws IllegalArgumentException	if the cookie name is null or
-     * empty or contains any illegal characters (for example, a comma,
-     * space, or semicolon) or matches a token reserved for use by the
-     * cookie protocol
-     *
-     * @see #setValue
-     * @see #setVersion
+     * 默认情况下，cookie是根据netscape cookie规范创建的，可以使用#setVersion方法
+     * 改变.
+     * 
+     * cookie name需要遵循: 
+     * 非Java保留标记，不区分大小写情况下，不等于Comment、Domain、Expires、Max-Age、
+     * Path、Secure、Version、不以$开头.
+     * 
+     * @throws IllegalArgumentException	如果cookie name为null，空字符串或者含有
+     * 如逗号、分号、空格等非法字符，或含有cookie协议中保留字符.
      */
     public Cookie(String name, String value) {
         if (name == null || name.length() == 0) {
             throw new IllegalArgumentException(
+                    // Cookie name must not be null or empty
                     lStrings.getString("err.cookie_name_blank"));
         }
+        // token是对编译器有意义的最小单元，如关键字、标识符、常量、特殊符号、运算符等
         if (!isToken(name) ||
-                name.equalsIgnoreCase("Comment") || // rfc2019
+                name.equalsIgnoreCase("Comment") || // rfc2109
                 name.equalsIgnoreCase("Discard") || // 2019++
                 name.equalsIgnoreCase("Domain") ||
-                name.equalsIgnoreCase("Expires") || // (old cookies)
-                name.equalsIgnoreCase("Max-Age") || // rfc2019
+                name.equalsIgnoreCase("Expires") || // (old netscape cookies)
+                name.equalsIgnoreCase("Max-Age") || // rfc2109
                 name.equalsIgnoreCase("Path") ||
                 name.equalsIgnoreCase("Secure") ||
                 name.equalsIgnoreCase("Version") ||
@@ -133,6 +152,7 @@ public class Cookie implements Cloneable, Serializable {
             Object[] errArgs = new Object[1];
             errArgs[0] = name;
             errMsg = MessageFormat.format(errMsg, errArgs);
+            // errMsg: Cookie name \"name\" is a reserved token
             throw new IllegalArgumentException(errMsg);
         }
 
@@ -141,260 +161,142 @@ public class Cookie implements Cloneable, Serializable {
     }
 
     /**
-     * Specifies a comment that describes a cookie's purpose.
-     * The comment is useful if the browser presents the cookie 
-     * to the user. Comments
-     * are not supported by Netscape Version 0 cookies.
-     *
-     * @param purpose		a <code>String</code> specifying the comment 
-     *				to display to the user
-     *
-     * @see #getComment
+     * 设置comment，netscape cookie version0不支持.
      */
     public void setComment(String purpose) {
         comment = purpose;
     }
 
     /**
-     * Returns the comment describing the purpose of this cookie, or
-     * <code>null</code> if the cookie has no comment.
-     *
-     * @return the comment of the cookie, or <code>null</code> if unspecified
-     *
-     * @see #setComment
+     * 获取comment
      */ 
     public String getComment() {
         return comment;
     }
     
     /**
-     *
-     * Specifies the domain within which this cookie should be presented.
-     *
-     * <p>The form of the domain name is specified by RFC 2109. A domain
-     * name begins with a dot (<code>.foo.com</code>) and means that
-     * the cookie is visible to servers in a specified Domain Name System
-     * (DNS) zone (for example, <code>www.foo.com</code>, but not 
-     * <code>a.b.foo.com</code>). By default, cookies are only returned
-     * to the server that sent them.
-     *
-     * @param domain the domain name within which this cookie is visible;
-     * form is according to RFC 2109
-     *
-     * @see #getDomain
+     * 设置domain
+     * domain名格式由rfc2019指定，以.开始(如.foo.com，表示对www.foo.com可见，
+     * 但对a.b.foo.com不可见).默认情况下，cookie只会返回给发送给它的服务器(host).
      */
     public void setDomain(String domain) {
+        // 根据Locale语言为英语进行小写转换
         this.domain = domain.toLowerCase(Locale.ENGLISH); // IE allegedly needs this
     }
 
     /**
-     * Gets the domain name of this Cookie.
-     *
-     * <p>Domain names are formatted according to RFC 2109.
-     *
-     * @return the domain name of this Cookie
-     *
-     * @see #setDomain
+     * 获取domain
      */ 
     public String getDomain() {
         return domain;
     }
 
     /**
-     * Sets the maximum age in seconds for this Cookie.
+     * 设置cookie的有效时间(秒)
      *
-     * <p>A positive value indicates that the cookie will expire
-     * after that many seconds have passed. Note that the value is
-     * the <i>maximum</i> age when the cookie will expire, not the cookie's
-     * current age.
-     *
-     * <p>A negative value means
-     * that the cookie is not stored persistently and will be deleted
-     * when the Web browser exits. A zero value causes the cookie
-     * to be deleted.
-     *
-     * @param expiry		an integer specifying the maximum age of the
-     * 				cookie in seconds; if negative, means
-     *				the cookie is not stored; if zero, deletes
-     *				the cookie
-     *
-     * @see #getMaxAge
+     * 正值表示cookie将会在delta-seconds后过期.负值表示cookie不会持久储存，将
+     * 在浏览器退出后删除.0值将导致cookie被删除.
      */
     public void setMaxAge(int expiry) {
         maxAge = expiry;
     }
 
     /**
-     * Gets the maximum age in seconds of this Cookie.
+     * 获取Max-Age
      *
-     * <p>By default, <code>-1</code> is returned, which indicates that
-     * the cookie will persist until browser shutdown.
-     *
-     * @return			an integer specifying the maximum age of the
-     *				cookie in seconds; if negative, means
-     *				the cookie persists until browser shutdown
-     *
-     * @see #setMaxAge
+     * 默认情况下，返回-1，表示cookie在浏览器关闭之后将删除
      */
     public int getMaxAge() {
         return maxAge;
     }
     
     /**
-     * Specifies a path for the cookie
-     * to which the client should return the cookie.
+     * 设置path
      *
-     * <p>The cookie is visible to all the pages in the directory
-     * you specify, and all the pages in that directory's subdirectories. 
-     * A cookie's path must include the servlet that set the cookie,
-     * for example, <i>/catalog</i>, which makes the cookie
-     * visible to all directories on the server under <i>/catalog</i>.
-     *
-     * <p>Consult RFC 2109 (available on the Internet) for more
-     * information on setting path names for cookies.
-     *
-     *
-     * @param uri		a <code>String</code> specifying a path
-     *
-     * @see #getPath
+     * cookie在设定的目录和子目录下是可见的.cookie的path必须包括servlet设置
+     * cookie的path. 
+     * eg. /catalog/将会使cookie对于此服务/catalog下的所有目录可见
      */
     public void setPath(String uri) {
         path = uri;
     }
 
     /**
-     * Returns the path on the server 
-     * to which the browser returns this cookie. The
-     * cookie is visible to all subpaths on the server.
-     *
-     * @return		a <code>String</code> specifying a path that contains
-     *			a servlet name, for example, <i>/catalog</i>
-     *
-     * @see #setPath
+     * 获取path
      */ 
     public String getPath() {
         return path;
     }
 
     /**
-     * Indicates to the browser whether the cookie should only be sent
-     * using a secure protocol, such as HTTPS or SSL.
+     * 向浏览器说明是否应该使用安全协议(如HTTPS或者SSL)发送cookie.
      *
-     * <p>The default value is <code>false</code>.
-     *
-     * @param flag if <code>true</code>, sends the cookie from the browser
-     * to the server only when using a secure protocol; if <code>false</code>,
-     * sent on any protocol
-     *
-     * @see #getSecure
+     * 默认值为false
      */
     public void setSecure(boolean flag) {
         secure = flag;
     }
 
     /**
-     * Returns <code>true</code> if the browser is sending cookies
-     * only over a secure protocol, or <code>false</code> if the
-     * browser can send cookies using any protocol.
-     *
-     * @return <code>true</code> if the browser uses a secure protocol,
-     * <code>false</code> otherwise
-     *
-     * @see #setSecure
+     * 获取secure的值
      */
     public boolean getSecure() {
         return secure;
     }
 
     /**
-     * Returns the name of the cookie. The name cannot be changed after
-     * creation.
-     *
-     * @return the name of the cookie
+     * 获取cookie name，创建之后不能改变name.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Assigns a new value to this Cookie.
+     * 设置value
      * 
-     * <p>If you use a binary value, you may want to use BASE64 encoding.
+     * 如果使用二进制值，可以使用base64进行编码成字符串
      *
-     * <p>With Version 0 cookies, values should not contain white 
-     * space, brackets, parentheses, equals signs, commas,
-     * double quotes, slashes, question marks, at signs, colons,
-     * and semicolons. Empty values may not behave the same way
-     * on all browsers.
-     *
-     * @param newValue the new value of the cookie
-     *
-     * @see #getValue
+     * 对于version 0的cookie，值必须不含空格，花括号，圆括号，等于号，逗号
+     * ，双引号，斜杠，问号，@，冒号，分号.空值可能在不同浏览器上有不同的含义.
      */
     public void setValue(String newValue) {
         value = newValue;
     }
 
     /**
-     * Gets the current value of this Cookie.
-     *
-     * @return the current value of this Cookie
-     *
-     * @see #setValue
+     * 获取value
      */
     public String getValue() {
         return value;
     }
 
     /**
-     * Returns the version of the protocol this cookie complies 
-     * with. Version 1 complies with RFC 2109, 
-     * and version 0 complies with the original
-     * cookie specification drafted by Netscape. Cookies provided
-     * by a browser use and identify the browser's cookie version.
-     * 
-     * @return			0 if the cookie complies with the
-     *				original Netscape specification; 1
-     *				if the cookie complies with RFC 2109
-     *
-     * @see #setVersion
+     * 获取cookie遵从的协议版本.
+     * 1表示rfc2109，0表示netscape cookie协议.
      */
     public int getVersion() {
         return version;
     }
 
     /**
-     * Sets the version of the cookie protocol that this Cookie complies
-     * with.
-     *
-     * <p>Version 0 complies with the original Netscape cookie
-     * specification. Version 1 complies with RFC 2109.
-     *
-     * <p>Since RFC 2109 is still somewhat new, consider
-     * version 1 as experimental; do not use it yet on production sites.
-     *
-     * @param v	0 if the cookie should comply with the original Netscape
-     * specification; 1 if the cookie should comply with RFC 2109
-     *
-     * @see #getVersion
+     * 设置version
      */
     public void setVersion(int v) {
         version = v;
     }
 
     /*
-     * Tests a string and returns true if the string counts as a 
-     * reserved token in the Java language.
-     * 
-     * @param value the <code>String</code> to be tested
-     *
-     * @return <code>true</code> if the <code>String</code> is a reserved
-     * token; <code>false</code> otherwise
+     * 测试给定字符串是否是java语言中的保留token
      */
     private boolean isToken(String value) {
         int len = value.length();
         for (int i = 0; i < len; i++) {
             char c = value.charAt(i);
+            /*
+            ASCII码表中前32个字符是不能用于打印的控制字符.第127个字符是删除命令.
+            在TSPECIALS特殊字符中
+            以上两种情况之内的字符都不是保留token，返回false.
+             */
             if (c < 0x20 || c >= 0x7f || TSPECIALS.indexOf(c) != -1) {
                 return false;
             }
@@ -404,44 +306,31 @@ public class Cookie implements Cloneable, Serializable {
     }
 
     /**
-     * Overrides the standard <code>java.lang.Object.clone</code> 
-     * method to return a copy of this Cookie.
+     * 重写Object类的clone方法来返回cookie的副本(浅拷贝，但是cookie的相关属性都是
+     * 基本类型，没有引用类型可以做到完全copy.)
      */
     public Object clone() {
         try {
             return super.clone();
+        // 没有实现Cloneable接口会抛出CloneNotSupportedException异常
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
     /**
-     * Marks or unmarks this Cookie as <i>HttpOnly</i>.
+     * 设置HttpOnly的值
      *
-     * <p>If <tt>isHttpOnly</tt> is set to <tt>true</tt>, this cookie is
-     * marked as <i>HttpOnly</i>, by adding the <tt>HttpOnly</tt> attribute
-     * to it.
+     * 如果设置为true，则cookie会有HttpOnly标记.
      *
-     * <p><i>HttpOnly</i> cookies are not supposed to be exposed to
-     * client-side scripting code, and may therefore help mitigate certain
-     * kinds of cross-site scripting attacks.
-     *
-     * @param isHttpOnly true if this cookie is to be marked as
-     * <i>HttpOnly</i>, false otherwise
-     *
-     * @since Servlet 3.0
+     * HttpOnly标记的cookie不应该被暴露在客户端的js代码中，可以缓和xxs攻击.
      */
     public void setHttpOnly(boolean isHttpOnly) {
         this.isHttpOnly = isHttpOnly;
     }
  
     /**
-     * Checks whether this Cookie has been marked as <i>HttpOnly</i>.
-     *
-     * @return true if this Cookie has been marked as <i>HttpOnly</i>,
-     * false otherwise
-     *
-     * @since Servlet 3.0
+     * 检查cookie是否有HttpOnly标记
      */
     public boolean isHttpOnly() {
         return isHttpOnly;
