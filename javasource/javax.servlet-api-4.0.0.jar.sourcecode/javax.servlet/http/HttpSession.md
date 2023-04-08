@@ -19,7 +19,7 @@ import javax.servlet.ServletContext;
 
 /**
  * http会话
- * 当应用从session中存储或者移除对象时,sesion会检查这个对象
+ * 当应用从session中存储或者移除对象时,session会检查这个对象
  * 是否实现了HttpSessionBindListener接口,如果实现了，那么
  * servlet会通知这个对象它被绑定或者取消绑定
  */
