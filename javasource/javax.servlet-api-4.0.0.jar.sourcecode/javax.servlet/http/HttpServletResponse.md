@@ -9,715 +9,469 @@ import java.util.function.Supplier;
 import javax.servlet.ServletResponse;
 
 /**
+ * 继承ServletResponse接口来提供HTTP协议在发送响应的功能.
+ * 如，此接口有访问HTTP首部和cookie的方法.
  *
- * Extends the {@link ServletResponse} interface to provide HTTP-specific
- * functionality in sending a response.  For example, it has methods
- * to access HTTP headers and cookies.
- *
- * <p>The servlet container creates an <code>HttpServletResponse</code> object
- * and passes it as an argument to the servlet's service methods
- * (<code>doGet</code>, <code>doPost</code>, etc).
- *
- * 
- * @author	Various
- *
- * @see		javax.servlet.ServletResponse
- *
+ * servlet容器创建HttpServletResponse实例，并将其作为参数传给servlet的service
+ * 方法(doGet、doPost等等).
  */
 public interface HttpServletResponse extends ServletResponse {
 
     /**
-     * Adds the specified cookie to the response.  This method can be called
-     * multiple times to set more than one cookie.
-     *
-     * @param cookie the Cookie to return to the client
-     *
+     * 将指定的cookie加入到response中.可以多次调用此方法来设置更多的cookie.
      */
     public void addCookie(Cookie cookie);
 
     /**
-     * Returns a boolean indicating whether the named response header 
-     * has already been set.
-     * 
-     * @param	name	the header name
-     * @return		<code>true</code> if the named response header 
-     *			has already been set; 
-     * 			<code>false</code> otherwise
+     * 检查response中是否有指定name的首部.
      */
     public boolean containsHeader(String name);
 
     /**
-     * Encodes the specified URL by including the session ID,
-     * or, if encoding is not needed, returns the URL unchanged.
-     * The implementation of this method includes the logic to
-     * determine whether the session ID needs to be encoded in the URL.
-     * For example, if the browser supports cookies, or session
-     * tracking is turned off, URL encoding is unnecessary.
+     * 对指定URL进行编码，编码后包含会话ID，若逻辑判断不需要编码，则返回原URL.
+     * 对此方法的实现需包括: 确定会话ID是否需要包含在编码后的URL中，当浏览器允许
+     * cookie或URL重写(会话跟踪)被关闭时，则不需要编码URL.
      * 
-     * <p>For robust session tracking, all URLs emitted by a servlet 
-     * should be run through this
-     * method.  Otherwise, URL rewriting cannot be used with browsers
-     * which do not support cookies.
+     * 对于健壮的会话各种，Servlet发出的所有URL都应该通过这个方法运行，否则，
+     * URL重写不能用于不支持cookie的浏览器.
+     * 
+     * 如果参数URL是相对的，则相对于当前的HttpServletRequest.
      *
-     * <p>If the URL is relative, it is always relative to the current
-     * HttpServletRequest.
-     *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed;
-     * 			the unchanged URL otherwise.
-     * @exception IllegalArgumentException if the url is not valid
+     * @exception IllegalArgumentException url无效.
      */
     public String encodeURL(String url);
 
     /**
-     * Encodes the specified URL for use in the
-     * <code>sendRedirect</code> method or, if encoding is not needed,
-     * returns the URL unchanged.  The implementation of this method
-     * includes the logic to determine whether the session ID
-     * needs to be encoded in the URL.  For example, if the browser supports
-     * cookies, or session tracking is turned off, URL encoding is
-     * unnecessary.  Because the rules for making this determination can
-     * differ from those used to decide whether to
-     * encode a normal link, this method is separated from the
-     * <code>encodeURL</code> method.
+     * 编码用在sendRedirect的指定URL，如不需要，返回原URL.
+     * 此方法包含会话ID的逻辑与encodeURL(String url)是不同的，所以进行了分离.
      * 
-     * <p>All URLs sent to the <code>HttpServletResponse.sendRedirect</code>
-     * method should be run through this method.  Otherwise, URL
-     * rewriting cannot be used with browsers which do not support
-     * cookies.
+     * 所有发送到HttpServletResponse.sendRedirect的URL应该通过此方法运行，否则，
+     * URL重写不能用于支持cookies的浏览器.
      *
-     * <p>If the URL is relative, it is always relative to the current
-     * HttpServletRequest.
-     *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed;
-     * 			the unchanged URL otherwise.
-     * @exception IllegalArgumentException if the url is not valid
-     *
-     * @see #sendRedirect
-     * @see #encodeUrl
+     * 如果参数URL是相对的，则相对于当前的HttpServletRequest.
+     * 
+     * @exception IllegalArgumentException url无效.
      */
     public String encodeRedirectURL(String url);
 
     /**
-     * @deprecated	As of version 2.1, use encodeURL(String url) instead
+     * @deprecated 到version 2.1为止, 使用encodeURL(String url)代替.
      *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed; 
-     * 			the unchanged URL otherwise.
-     * @exception IllegalArgumentException if the url is not valid
+     * @exception IllegalArgumentException url无效.
      */
     @Deprecated
     public String encodeUrl(String url);
     
     /**
-     * @deprecated	As of version 2.1, use 
-     *			encodeRedirectURL(String url) instead
-     *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed; 
-     * 			the unchanged URL otherwise.
-     * @exception IllegalArgumentException if the url is not valid
+     * @deprecated 到version 2.1为止, encodeRedirectURL(String url)代替.
+     * 
+     * @exception IllegalArgumentException url无效.
      */
     @Deprecated
     public String encodeRedirectUrl(String url);
 
     /**
-     * <p>Sends an error response to the client using the specified
-     * status and clears the buffer.  The server defaults to creating
-     * the response to look like an HTML-formatted server error page
-     * containing the specified message, setting the content type to
-     * "text/html".  The caller is <strong>not</strong> responsible for
-     * escaping or re-encoding the message to ensure it is safe with
-     * respect to the current response encoding and content type.  This
-     * aspect of safety is the responsibility of the container, as it is
-     * generating the error page containing the message.  The server
-     * will preserve cookies and may clear or update any headers needed
-     * to serve the error page as a valid response.</p>
+     * 写入指定的状态码和错误描述信息，并清除缓冲区，将错误响应给客户端.
+     * 默认返回的MIME类型是"text/html".调用者并不会对当前response的编码和MIME类型
+     * 负责，这是容器层面的安全责任.
      *
-     * <p>If an error-page declaration has been made for the web
-     * application corresponding to the status code passed in, it will
-     * be served back in preference to the suggested msg parameter and
-     * the msg parameter will be ignored.</p>
+     * 如果web应用对指定状态码有错误页面描述，可能会忽略参数msg.
      *
-     * <p>If the response has already been committed, this method throws 
-     * an IllegalStateException.
-     * After using this method, the response should be considered
-     * to be committed and should not be written to.
+     * 使用此方法后，response被视作已经提交，不能被写入.
+     * 
+     * @exception	IOException	I/O Error
      *
-     * @param	sc	the error status code
-     * @param	msg	the descriptive message
-     * @exception	IOException	If an input or output exception occurs
-     * @exception	IllegalStateException	If the response was committed
+     * @exception	IllegalStateException response已经被提交.
      */
     public void sendError(int sc, String msg) throws IOException;
 
     /**
-     * Sends an error response to the client using the specified status
-     * code and clears the buffer.
-     * 
-     * The server will preserve cookies and may clear or
-     * update any headers needed to serve the error page as a valid response.
+     * 写入指定的状态码，并清除缓冲区，将错误响应给客户端.
      *
-     * If an error-page declaration has been made for the web application
-     * corresponding to the status code passed in, it will be served back
-     * the error page
-     * 
-     * <p>If the response has already been committed, this method throws 
-     * an IllegalStateException.
-     * After using this method, the response should be considered
-     * to be committed and should not be written to.
-     *
-     * @param	sc	the error status code
-     * @exception	IOException	If an input or output exception occurs
-     * @exception	IllegalStateException	If the response was committed
-     *						before this method call
+     * @exception	IOException I/O Error
+     * @exception	IllegalStateException response已经被提交.
      */
     public void sendError(int sc) throws IOException;
 
     /**
-     * Sends a temporary redirect response to the client using the
-     * specified redirect location URL and clears the buffer. The buffer will
-     * be replaced with the data set by this method. Calling this method sets the
-     * status code to {@link #SC_FOUND} 302 (Found).
-     * This method can accept relative URLs;the servlet container must convert
-     * the relative URL to an absolute URL
-     * before sending the response to the client. If the location is relative 
-     * without a leading '/' the container interprets it as relative to
-     * the current request URI. If the location is relative with a leading
-     * '/' the container interprets it as relative to the servlet container root.
-     * If the location is relative with two leading '/' the container interprets
-     * it as a network-path reference (see
-     * <a href="http://www.ietf.org/rfc/rfc3986.txt">
-     * RFC 3986: Uniform Resource Identifier (URI): Generic Syntax</a>, section 4.2
-     * &quot;Relative Reference&quot;).
-     *
-     * <p>If the response has already been committed, this method throws 
-     * an IllegalStateException.
-     * After using this method, the response should be considered
-     * to be committed and should not be written to.
-     *
-     * @param		location	the redirect location URL
-     * @exception	IOException	If an input or output exception occurs
-     * @exception	IllegalStateException	If the response was committed or
-     *              if a partial URL is given and cannot be converted into a valid URL
+     * 使用指定的重定向URL向客户端发送临时重定向响应.
+     * 调用此方法会将状态码设置为#SC_FOUND 302 (Found).
+     * 此方法可以使相对URL，servlet容器需要转化为绝对URL，然后给客户端发送响应.
+     * 不是以"/"开头的相对路径是相对于当前请求URL.
+     * 以"/"开头的相对路径是相对于当servlet容器的根路径.
+     * 以"//"开头的相对路径是network-path(<a href="http://www.ietf.org/rfc/rfc3986.txt">)
+     * 
+     * @exception	IOException 
+     * @exception	IllegalStateException response已经被提交或者localtion不能转化为有效的URL.
      */
     public void sendRedirect(String location) throws IOException;
     
     /**
-     * 
-     * Sets a response header with the given name and
-     * date-value.  The date is specified in terms of
-     * milliseconds since the epoch.  If the header had already
-     * been set, the new value overwrites the previous one.  The
-     * <code>containsHeader</code> method can be used to test for the
-     * presence of a header before setting its value.
-     * 
-     * @param	name	the name of the header to set
-     * @param	date	the assigned date value
-     * 
-     * @see #containsHeader
-     * @see #addDateHeader
+     * 设置Date类型的响应头(date为自epoch的毫秒数)，若已经存在指定的头，则会覆盖.
      */
     public void setDateHeader(String name, long date);
     
     /**
-     * 
-     * Adds a response header with the given name and
-     * date-value.  The date is specified in terms of
-     * milliseconds since the epoch.  This method allows response headers 
-     * to have multiple values.
-     * 
-     * @param	name	the name of the header to set
-     * @param	date	the additional date value
-     * 
-     * @see #setDateHeader
+     * 新增Date类型头信息.不管是否存在，都会追加，可允许存在多个同名的头.
      */
     public void addDateHeader(String name, long date);
     
     /**
-     *
-     * Sets a response header with the given name and value.
-     * If the header had already been set, the new value overwrites the
-     * previous one.  The <code>containsHeader</code> method can be
-     * used to test for the presence of a header before setting its
-     * value.
+     * 使用给定的name和value设置响应头，如果已经存在，则会覆盖.
      * 
-     * @param	name	the name of the header
-     * @param	value	the header value  If it contains octet string,
-     *		it should be encoded according to RFC 2047
-     *		(http://www.ietf.org/rfc/rfc2047.txt)
-     *
-     * @see #containsHeader
-     * @see #addHeader
+     * @param	name 响应头name
+     * @param	value 响应头value  如果包含octet string(16进制表示的字节序列)，
+     * 应该根据RFC 2047编码(http://www.ietf.org/rfc/rfc2047.txt)
      */
     public void setHeader(String name, String value);
     
     /**
-     * Adds a response header with the given name and value.
-     * This method allows response headers to have multiple values.
+     * 新增头信息.不管是否存在，都会追加，可允许存在多个同名的头.
      * 
-     * @param	name	the name of the header
-     * @param	value	the additional header value   If it contains
-     *		octet string, it should be encoded
-     *		according to RFC 2047
-     *		(http://www.ietf.org/rfc/rfc2047.txt)
-     *
-     * @see #setHeader
+     * @param	name 响应头name
+     * @param	value 响应头追加value  如果包含octet string(16进制表示的字节序列)，
+     * 应该根据RFC 2047编码(http://www.ietf.org/rfc/rfc2047.txt)
      */
     public void addHeader(String name, String value);
 
     /**
-     * Sets a response header with the given name and
-     * integer value.  If the header had already been set, the new value
-     * overwrites the previous one.  The <code>containsHeader</code>
-     * method can be used to test for the presence of a header before
-     * setting its value.
-     *
-     * @param	name	the name of the header
-     * @param	value	the assigned integer value
-     *
-     * @see #containsHeader
-     * @see #addIntHeader
+     * 设置int类型头信息.若已经存在指定的头，则会覆盖.
      */
     public void setIntHeader(String name, int value);
 
     /**
-     * Adds a response header with the given name and
-     * integer value.  This method allows response headers to have multiple
-     * values.
-     *
-     * @param	name	the name of the header
-     * @param	value	the assigned integer value
-     *
-     * @see #setIntHeader
+     * 新增int类型头信息.不管是否存在，都会追加，可允许存在多个同名的头.
      */
     public void addIntHeader(String name, int value);
 
     /**
-     * Sets the status code for this response. 
+     * 设置response的状态码.
+     * 
+     * 此方法被用来设置成功的状态码，出现错误设置状态码可以使用#sendError.
+     * 如果使用此方法发送一个错误状态码，则容器的错误页面机制不会被触发.
+     * 例如: SC_OK、SC_MOVED_TEMPORARILY
      *
-     * <p>This method is used to set the return status code when there is
-     * no error (for example, for the SC_OK or SC_MOVED_TEMPORARILY status
-     * codes).
-     *
-     * <p>If this method is used to set an error code, then the container's
-     * error page mechanism will not be triggered. If there is an error and
-     * the caller wishes to invoke an error page defined in the web
-     * application, then {@link #sendError} must be used instead.
-     *
-     * <p>This method preserves any cookies and other response headers. 
-     *
-     * <p>Valid status codes are those in the 2XX, 3XX, 4XX, and 5XX ranges.
-     * Other status codes are treated as container specific.
-     *
-     * @param	sc	the status code
-     *
-     * @see #sendError
+     * 此方法会保留cookie和响应头.
+     * 
+     * 有效状态码范围2XX, 3XX, 4XX, and 5XX，其它状态码被视为容器特有的.
      */
     public void setStatus(int sc);
-  
 
     /**
-     * @deprecated As of version 2.1, due to ambiguous meaning of the 
-     * message parameter. To set a status code 
-     * use <code>setStatus(int)</code>, to send an error with a description
-     * use <code>sendError(int, String)</code>.
-     *
-     * Sets the status code and message for this response.
+     * 为response设置状态码和内容.
      * 
-     * @param	sc	the status code
-     * @param	sm	the status message
+     * @deprecated 截止version 2.1, 由于参数ms的意义不明确.
+     * 使用#setStatu(int)设置状态码，使用sendError(int, String)发送带有描述信息的错误.
+     * Sets the status code and message for this response.
      */
     @Deprecated
     public void setStatus(int sc, String sm);
 
     /**
-     * Gets the current status code of this response.
-     *
-     * @return the current status code of this response
-     *
-     * @since Servlet 3.0
+     * 获取此response的当前状态码.
      */
     public int getStatus();
 
     /**
-     * Gets the value of the response header with the given name.
-     * 
-     * <p>If a response header with the given name exists and contains
-     * multiple values, the value that was added first will be returned.
+     * 使用参数name获取response响应头的值.
+     * 如果存在多个值，返回第一个；如果不存在，返回null.
      *
-     * <p>This method considers only response headers set or added via
-     * {@link #setHeader}, {@link #addHeader}, {@link #setDateHeader},
-     * {@link #addDateHeader}, {@link #setIntHeader}, or
-     * {@link #addIntHeader}, respectively.
-     *
-     * @param name the name of the response header whose value to return
-     *
-     * @return the value of the response header with the given name,
-     * or <tt>null</tt> if no header with the given name has been set
-     * on this response
-     *
-     * @since Servlet 3.0
+     * 此方法只考虑通过#setHeader、#addHeader、#setDateHeader、#addDateHeader、
+     * #setIntHeader、#addIntHeader设置或添加的响应头.
      */
     public String getHeader(String name); 
 
     /**
-     * Gets the values of the response header with the given name.
-     *
-     * <p>This method considers only response headers set or added via
-     * {@link #setHeader}, {@link #addHeader}, {@link #setDateHeader},
-     * {@link #addDateHeader}, {@link #setIntHeader}, or
-     * {@link #addIntHeader}, respectively.
-     *
-     * <p>Any changes to the returned <code>Collection</code> must not 
-     * affect this <code>HttpServletResponse</code>.
-     *
-     * @param name the name of the response header whose values to return
-     *
-     * @return a (possibly empty) <code>Collection</code> of the values
-     * of the response header with the given name
-     *
-     * @since Servlet 3.0
+     * 使用参数name获取response响应头的所有值.
+     * 
+     * 对返回集合的改变不会影响HttpServletResponse obj.
      */			
     public Collection<String> getHeaders(String name); 
     
     /**
-     * Gets the names of the headers of this response.
-     *
-     * <p>This method considers only response headers set or added via
-     * {@link #setHeader}, {@link #addHeader}, {@link #setDateHeader},
-     * {@link #addDateHeader}, {@link #setIntHeader}, or
-     * {@link #addIntHeader}, respectively.
-     *
-     * <p>Any changes to the returned <code>Collection</code> must not 
-     * affect this <code>HttpServletResponse</code>.
-     *
-     * @return a (possibly empty) <code>Collection</code> of the names
-     * of the headers of this response
-     *
-     * @since Servlet 3.0
+     * 返回response的响应头的name集合.
      */
     public Collection<String> getHeaderNames();
 
     /**
-     * Sets the supplier of trailer headers.
+     * 设置trailer字段的supplier.
      *
-     * <p>The trailer header field value is defined as a comma-separated list
-     * (see Section 3.2.2 and Section 4.1.2 of RFC 7230).</p>
+     * 参考RFC 7230(Trailer Field)，违反了4.1.2章节的trailer将会被忽略.
      *
-     * <p>The supplier will be called within the scope of whatever thread/call
-     * causes the response content to be completed. Typically this will
-     * be any thread calling close() on the output stream or writer.</p>
+     * supplier将会在造成response内容写入完成的线程和调用中被调用.通常在
+     * 输出流中调用close()的线程处调用.
      *
-     * <p>The trailers that run afoul of the provisions of section 4.1.2 of
-     * RFC 7230 are ignored.</p>
-     *
-     * <p>The RFC requires the name of every key that is to be in the
-     * supplied Map is included in the comma separated list that is the value
-     * of the "Trailer" response header.  The application is responsible for
-     * ensuring this requirement is met.  Failure to do so may lead to
-     * interoperability failures.</p>
-     *
-     * @implSpec
-     * The default implementation is a no-op.
-     *
-     * @param supplier the supplier of trailer headers
-     *
-     * @exception IllegalStateException if it is invoked after the response has
-     *         has been committed,
-     *         or the trailer is not supported in the request, for instance,
-     *         the underlying protocol is HTTP 1.0, or the response is not
-     *         in chunked encoding in HTTP 1.1.
-     *
-     * @since Servlet 4.0
+     * @exception IllegalStateException response已经提交或trailer在请求中没有被支持，
+     * 如，底层的协议是HTTP1.0或HTTP1.1响应不是chunked编码(Transfer-Encoding: chunked).
      */
     default public void setTrailerFields(Supplier<Map<String, String>> supplier) {
     }
 
     /**
-     * Gets the supplier of trailer headers.
-     *
-     * @implSpec
-     * The default implememtation return null.
-     *
-     * @return <code>Supplier</code> of trailer headers
-     * 
-     * @since Servlet 4.0
+     * 获取trailer字段的supplier.
      */
     default public Supplier<Map<String, String>> getTrailerFields() {
         return null;
     }
 
-
     /*
-     * Server status codes; see RFC 2068.
+     * 状态码参考RFC2068(Status Code and Reason Phrase)
      */
 
     /**
-     * Status code (100) indicating the client can continue.
+     * 100 Continue
+     * 表示客户端应该继续请求.
      */
     public static final int SC_CONTINUE = 100;
 
     /**
-     * Status code (101) indicating the server is switching protocols
-     * according to Upgrade header.
+     * 101 Switching Protocol
+     * 表示服务器应客户端升级协议的请求(Upgrade请求头)正在切换协议.
      */
     public static final int SC_SWITCHING_PROTOCOLS = 101;
 
     /**
-     * Status code (200) indicating the request succeeded normally.
+     * 200 OK
+     * 表示请求成功.
      */
     public static final int SC_OK = 200;
 
     /**
-     * Status code (201) indicating the request succeeded and created
-     * a new resource on the server.
+     * 201 Created
+     * 表示请求成功并且创建了一个新的资源.
      */
     public static final int SC_CREATED = 201;
 
     /**
-     * Status code (202) indicating that a request was accepted for
-     * processing, but was not completed.
+     * 202 Accepted
+     * 表示请求已经被接受，并且被处理，但处理还没有完成.
      */
     public static final int SC_ACCEPTED = 202;
 
     /**
-     * Status code (203) indicating that the meta information presented
-     * by the client did not originate from the server.
+     * 203 Non-Authoritative Information
+     * 表示获得的元数据不是来源于服务器.
      */
     public static final int SC_NON_AUTHORITATIVE_INFORMATION = 203;
 
     /**
-     * Status code (204) indicating that the request succeeded but that
-     * there was no new information to return.
+     * 204 No Content
+     * 表示请求成功，没有新的信息返回.
      */
     public static final int SC_NO_CONTENT = 204;
 
     /**
-     * Status code (205) indicating that the agent <em>SHOULD</em> reset
-     * the document view which caused the request to be sent.
+     * 205 Reset Content
+     * 用来通知客户端重置文档视图.
      */
     public static final int SC_RESET_CONTENT = 205;
 
     /**
-     * Status code (206) indicating that the server has fulfilled
-     * the partial GET request for the resource.
+     * 206 Partial Content
+     * 表示请求成功，响应体包含所请求的数据区间，
+     * 该数据区间是在请求的Range首部指定的.
      */
     public static final int SC_PARTIAL_CONTENT = 206;
 
     /**
-     * Status code (300) indicating that the requested resource
-     * corresponds to any one of a set of representations, each with
-     * its own specific location.
+     * 300 Multiple Choices
+     * 表示该请求拥有多种可能的响应.
      */
     public static final int SC_MULTIPLE_CHOICES = 300;
 
     /**
-     * Status code (301) indicating that the resource has permanently
-     * moved to a new location, and that future references should use a
-     * new URI with their requests.
+     * 301 Moved Permanently
+     * 说明请求的资源已经被移动到了由Location头部指定的url上，
+     * 不会再改变.
      */
     public static final int SC_MOVED_PERMANENTLY = 301;
 
     /**
-     * Status code (302) indicating that the resource has temporarily
-     * moved to another location, but that future references should
-     * still use the original URI to access the resource.
-     *
-     * This definition is being retained for backwards compatibility.
-     * SC_FOUND is now the preferred definition.
+     * 302 Found
+     * 表示请求的资源被暂时的移动到了由该HTTP响应的响应头Location
+     * 指定的URL上.
+     * 此定义被保留用于向后兼容.SC_FOUND是首选的定义.
      */
     public static final int SC_MOVED_TEMPORARILY = 302;
 
     /**
-    * Status code (302) indicating that the resource reside
-    * temporarily under a different URI. Since the redirection might
-    * be altered on occasion, the client should continue to use the
-    * Request-URI for future requests.(HTTP/1.1) To represent the
-    * status code (302), it is recommended to use this variable.
+    * 302 Found
+    * 表示302状态码，推荐使用此常量.
     */
     public static final int SC_FOUND = 302;
 
     /**
-     * Status code (303) indicating that the response to the request
-     * can be found under a different URI.
+     * 303 See Other
+     * 表示对请求的响应可以在另一个URI中被发现.
      */
     public static final int SC_SEE_OTHER = 303;
 
     /**
-     * Status code (304) indicating that a conditional GET operation
-     * found that the resource was available and not modified.
+     * 304 Not Modified
+     * 表示无需再次传输请求的内容，也就是可以使用缓存的内容.
+     * 例如GET或HEAD的请求头附带了If-None-Match或If-Modifed-Since的条件头部.
      */
     public static final int SC_NOT_MODIFIED = 304;
 
     /**
-     * Status code (305) indicating that the requested resource
-     * <em>MUST</em> be accessed through the proxy given by the
-     * <code><em>Location</em></code> field.
+     * 305 Use Proxy 
+     * 已弃用.指示请求的资源必须被Location字段指定的代理访问.
      */
     public static final int SC_USE_PROXY = 305;
 
      /**
-     * Status code (307) indicating that the requested resource 
-     * resides temporarily under a different URI. The temporary URI
-     * <em>SHOULD</em> be given by the <code><em>Location</em></code> 
-     * field in the response.
+     * 307 Temporary Redirect
+     * 服务器发送此响应，以指示客户端使用在前一个请求中使用的相
+     * 同方法在另一个 URI 上获取所请求的资源.
      */
     public static final int SC_TEMPORARY_REDIRECT = 307;
 
     /**
-     * Status code (400) indicating the request sent by the client was
-     * syntactically incorrect.
+     * 400 Bad Request
+     * 客户端错误(错误的请求语法、无效的请求消息帧或欺骗性的请求路由).
      */
     public static final int SC_BAD_REQUEST = 400;
 
     /**
-     * Status code (401) indicating that the request requires HTTP
-     * authentication.
+     * 401 Unauthorized 
+     * 客户端必须对自身进行身份验证才能获得请求的响应.
      */
     public static final int SC_UNAUTHORIZED = 401;
 
     /**
-     * Status code (402) reserved for future use.
+     * 402 Payment Required
+     * 保留供将来使用.
      */
     public static final int SC_PAYMENT_REQUIRED = 402;
 
     /**
-     * Status code (403) indicating the server understood the request
-     * but refused to fulfill it.
+     * 403 Forbidden
+     * 客户端没有访问内容的权限.与401 Unauthorized不同，服务器
+     * 知道客户端的身份.
      */
     public static final int SC_FORBIDDEN = 403;
 
     /**
-     * Status code (404) indicating that the requested resource is not
-     * available.
+     * 404 Not Found
+     * 服务器找不到请求的资源.
      */
     public static final int SC_NOT_FOUND = 404;
 
     /**
-     * Status code (405) indicating that the method specified in the
-     * <code><em>Request-Line</em></code> is not allowed for the resource
-     * identified by the <code><em>Request-URI</em></code>.
+     * 405 Method Not Allowed
+     * 服务器知道请求方法，但目标资源不支持该方法.
      */
     public static final int SC_METHOD_NOT_ALLOWED = 405;
 
     /**
-     * Status code (406) indicating that the resource identified by the
-     * request is only capable of generating response entities which have
-     * content characteristics not acceptable according to the accept
-     * headers sent in the request.
+     * 406 Not Acceptable
+     * 表示客户端错误，指代服务器端无法提供与 Accept-Charset 以及 
+     * Accept-Language 消息头指定的值相匹配的响应.
      */
     public static final int SC_NOT_ACCEPTABLE = 406;
 
     /**
-     * Status code (407) indicating that the client <em>MUST</em> first
-     * authenticate itself with the proxy.
+     * 407 Proxy Authentication Required
+     * 客户端认证需要由代理完成.
      */
     public static final int SC_PROXY_AUTHENTICATION_REQUIRED = 407;
 
     /**
-     * Status code (408) indicating that the client did not produce a
-     * request within the time that the server was prepared to wait.
+     * 408 Request Timeout
+     * 响应状态码意味着服务器想要关闭这个未使用的连接.
+     * 它由一些服务器在空闲连接上发送，即使客户端没有任何先前的请求.
      */
     public static final int SC_REQUEST_TIMEOUT = 408;
 
     /**
-     * Status code (409) indicating that the request could not be
-     * completed due to a conflict with the current state of the
-     * resource.
+     * 409 Conflict
+     * 当请求与服务器的当前状态冲突时，将发送此响应.
      */
     public static final int SC_CONFLICT = 409;
 
     /**
-     * Status code (410) indicating that the resource is no longer
-     * available at the server and no forwarding address is known.
-     * This condition <em>SHOULD</em> be considered permanent.
+     * 410 Gone
+     * 当请求的内容已从服务器中永久删除且没有转发地址时，
+     * 将发送此响应。客户端需要删除缓存和指向资源的链接.
      */
     public static final int SC_GONE = 410;
 
     /**
-     * Status code (411) indicating that the request cannot be handled
-     * without a defined <code><em>Content-Length</em></code>.
+     * 411 Length Required
+     * 服务端拒绝该请求因为 Content-Length 头部字段未定义但是服务端需要它.
      */
     public static final int SC_LENGTH_REQUIRED = 411;
 
     /**
-     * Status code (412) indicating that the precondition given in one
-     * or more of the request-header fields evaluated to false when it
-     * was tested on the server.
+     * 412 Precondition Failed
+     * 客户端在其头文件中指出了服务器不满足的先决条件.
      */
     public static final int SC_PRECONDITION_FAILED = 412;
 
     /**
-     * Status code (413) indicating that the server is refusing to process
-     * the request because the request entity is larger than the server is
-     * willing or able to process.
+     * 413 Payload Too Large请求实体大于服务器定义的限制.
+     * 服务器可能会关闭连接，或在标头字段后返回重试 Retry-After
      */
     public static final int SC_REQUEST_ENTITY_TOO_LARGE = 413;
 
     /**
-     * Status code (414) indicating that the server is refusing to service
-     * the request because the <code><em>Request-URI</em></code> is longer
-     * than the server is willing to interpret.
+     * 414 URI Too Long
+     * 客户端请求的 URI 比服务器愿意接收的长度长.
      */
     public static final int SC_REQUEST_URI_TOO_LONG = 414;
 
     /**
-     * Status code (415) indicating that the server is refusing to service
-     * the request because the entity of the request is in a format not
-     * supported by the requested resource for the requested method.
+     * 415 Unsupported Media Type
+     * 服务器不支持请求数据的媒体格式，因此服务器拒绝请求.
      */
     public static final int SC_UNSUPPORTED_MEDIA_TYPE = 415;
 
     /**
-     * Status code (416) indicating that the server cannot serve the
-     * requested byte range.
+     * 416 Range Not Satisfiable
+     * 无法满足请求中 Range 标头字段指定的范围.该范围可能超出了目标 URI 数据的大小.
      */
     public static final int SC_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
 
     /**
-     * Status code (417) indicating that the server could not meet the
-     * expectation given in the Expect request header.
+     * 417 Expectation Failed
+     * 此响应代码表示服务器无法满足 Expect 请求标头字段所指示的期望.
      */
     public static final int SC_EXPECTATION_FAILED = 417;
 
     /**
-     * Status code (500) indicating an error inside the HTTP server
-     * which prevented it from fulfilling the request.
+     * 500 Internal Server Error
+     * 服务器遇到了不知道如何处理的情况.
      */
     public static final int SC_INTERNAL_SERVER_ERROR = 500;
 
     /**
-     * Status code (501) indicating the HTTP server does not support
-     * the functionality needed to fulfill the request.
+     * 501 Not Implemented
+     * 服务器不支持此功能.
      */
     public static final int SC_NOT_IMPLEMENTED = 501;
 
     /**
-     * Status code (502) indicating that the HTTP server received an
-     * invalid response from a server it consulted when acting as a
-     * proxy or gateway.
+     * 502 Bad Gateway
+     * 此错误响应表明服务器作为网关需要得到一个处理这个请求的响应，
+     * 但是得到一个错误的响应.
      */
     public static final int SC_BAD_GATEWAY = 502;
 
     /**
-     * Status code (503) indicating that the HTTP server is
-     * temporarily overloaded, and unable to handle the request.
+     * 503 Service Unavailable
+     * 表明服务因维护或重载而停机，无法处理请求.
      */
     public static final int SC_SERVICE_UNAVAILABLE = 503;
 
     /**
-     * Status code (504) indicating that the server did not receive
-     * a timely response from the upstream server while acting as
-     * a gateway or proxy.
+     * 504 Gateway Timeout
+     * 当服务器充当网关且无法及时获得响应时，会给出此错误响应
      */
     public static final int SC_GATEWAY_TIMEOUT = 504;
 
     /**
-     * Status code (505) indicating that the server does not support
-     * or refuses to support the HTTP protocol version that was used
-     * in the request message.
+     * 505 HTTP Version Not Supported
+     * 服务器不支持或者拒绝支持请求中使用的HTTP版本.
      */
     public static final int SC_HTTP_VERSION_NOT_SUPPORTED = 505;
 }
