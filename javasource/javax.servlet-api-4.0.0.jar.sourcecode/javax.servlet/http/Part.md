@@ -6,130 +6,70 @@ import java.io.*;
 import java.util.*;
 
 /**
- * <p> This class represents a part or form item that was received within a
- * <code>multipart/form-data</code> POST request.
- * 
- * @since Servlet 3.0
+ * 此类用于表示接受multipart/form-data MIME类型的POST请求的一部分或者表单项.
  */
 public interface Part {
-
     /**
-     * Gets the content of this part as an <tt>InputStream</tt>
+     * 获取用于提取part内容的输入流.
      * 
-     * @return The content of this part as an <tt>InputStream</tt>
-     * @throws IOException If an error occurs in retrieving the content
-     * as an <tt>InputStream</tt>
+     * @throws IOException 从InputStream提取数据发生I/O错误
      */
     public InputStream getInputStream() throws IOException;
 
     /**
-     * Gets the content type of this part.
-     *
-     * @return The content type of this part.
+     * 获取part的MIME类型
      */
     public String getContentType();
 
     /**
-     * Gets the name of this part
-     *
-     * @return The name of this part as a <tt>String</tt>
+     * 获取part的name
+     * Content-Disposition: form-data; name="fieldName"; filename="filename.jpg"
+     * 也就是Content-Disposition标头的filedName或表单字段名的字符串.
      */
     public String getName();
 
     /**
-     * Gets the file name specified by the client
-     *
-     * @return the submitted file name
-     *
-     * @since Servlet 3.1
+     * 获取客户端上传的文件名.
      */
     public String getSubmittedFileName();
 
     /**
-     * Returns the size of this fille.
-     *
-     * @return a <code>long</code> specifying the size of this part, in bytes.
+     * 获取此部分的字节大小.
      */
     public long getSize();
 
     /**
-     * A convenience method to write this uploaded item to disk.
-     * 
-     * <p>This method is not guaranteed to succeed if called more than once for
-     * the same part. This allows a particular implementation to use, for
-     * example, file renaming, where possible, rather than copying all of the
-     * underlying data, thus gaining a significant performance benefit.
+     * 将上传的部分的内容写入磁盘.
      *
-     * @param fileName The location into which the uploaded part should
-       be stored. The value may be a file name or a path.  The actual
-       location of the file in the filesystem is relative to {@link
-       javax.servlet.MultipartConfigElement#getLocation()}.  Absolute
-       paths are used as provided and are relative to
-       <code>getLocation()</code>.  Note: that this is a system
-       dependent string and URI notation may not be acceptable on all
-       systems. For portability, this string should be generated with
-       the File or Path APIs.
-     *
-     * @throws IOException if an error occurs.
+     * @throws IOException I/O Error
      */
     public void write(String fileName) throws IOException;
 
     /**
-     * Deletes the underlying storage for a file item, including deleting any
-     * associated temporary disk file.
+     * 删除part的数据和关联的临时目录.
      *
-     * @throws IOException if an error occurs.
+     * @throws IOException I/O Error
      */
     public void delete() throws IOException;
 
     /**
-     *
-     * Returns the value of the specified mime header
-     * as a <code>String</code>. If the Part did not include a header
-     * of the specified name, this method returns <code>null</code>.
-     * If there are multiple headers with the same name, this method
-     * returns the first header in the part.
-     * The header name is case insensitive. You can use
-     * this method with any request header.
-     *
-     * @param name		a <code>String</code> specifying the
-     *				header name
-     *
-     * @return			a <code>String</code> containing the
-     *				value of the requested
-     *				header, or <code>null</code>
-     *				if the part does not
-     *				have a header of that name
+     * 获取指定name(不区分大小写)的标头. 如果part不包含指定name的标头，则返回null.
+     * 如果有多个name的标头，则此方法返回part中的第一个.
      */
     public String getHeader(String name);
 
     /**
-     * Gets the values of the Part header with the given name.
+     * 获取part标头中指定name(不区分大小写)的所有值.
      *
-     * <p>Any changes to the returned <code>Collection</code> must not 
-     * affect this <code>Part</code>.
-     *
-     * <p>Part header names are case insensitive.
-     *
-     * @param name the header name whose values to return
-     *
-     * @return a (possibly empty) <code>Collection</code> of the values of
-     * the header with the given name
+     * 对返回集合的改变不影响此part
      */
     public Collection<String> getHeaders(String name);
 
     /**
-     * Gets the header names of this Part.
+     * 获取part中所有的标头name集合.
      *
-     * <p>Some servlet containers do not allow
-     * servlets to access headers using this method, in
-     * which case this method returns <code>null</code>
-     *
-     * <p>Any changes to the returned <code>Collection</code> must not 
-     * affect this <code>Part</code>.
-     *
-     * @return a (possibly empty) <code>Collection</code> of the header
-     * names of this Part
+     * 一些servlet容器不允许servlet通过此方法来访问标头，在
+     * 这种情况下此方法返回null.
      */
     public Collection<String> getHeaderNames();
 }

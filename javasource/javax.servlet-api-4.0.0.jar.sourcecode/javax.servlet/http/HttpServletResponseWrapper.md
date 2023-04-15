@@ -9,37 +9,28 @@ import java.util.function.Supplier;
 import javax.servlet.ServletResponseWrapper;
 
 /**
- * 
- * Provides a convenient implementation of the HttpServletResponse interface that
- * can be subclassed by developers wishing to adapt the response from a Servlet.
- * This class implements the Wrapper or Decorator pattern. Methods default to
- * calling through to the wrapped response object.
- * 
- * @author Various
- * @since Servlet 2.3
- *
- * @see javax.servlet.http.HttpServletResponse
+ * 提供了一个HttpServletResponse接口的便捷实现.
  */
-
 public class HttpServletResponseWrapper extends ServletResponseWrapper implements HttpServletResponse {
 
     /** 
-     * Constructs a response adaptor wrapping the given response.
-     * @throws java.lang.IllegalArgumentException if the response is null
+     * 构造器，用来创建包裹给定request的HttpServletResponseWrapper obj
      *
-     * @param response the {@link HttpServletResponse} to be wrapped.
+     * @throws java.lang.IllegalArgumentException request为null
      */
     public HttpServletResponseWrapper(HttpServletResponse response) {
         super(response);
     }
     
+    /**
+     * 获取包裹的HttpServletResponse对象.
+     */
     private HttpServletResponse _getHttpServletResponse() {
         return (HttpServletResponse) super.getResponse();
     }
-    
+
     /**
-     * The default behavior of this method is to call addCookie(Cookie cookie)
-     * on the wrapped response object.
+     * 同HttpServletResponse#addCookie(Cookie cookie)
      */
     @Override
     public void addCookie(Cookie cookie) {
@@ -47,17 +38,15 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behavior of this method is to call containsHeader(String name)
-     * on the wrapped response object.
+     * 同HttpServletResponse#containsHeader(String name)
      */
     @Override
     public boolean containsHeader(String name) {
         return this._getHttpServletResponse().containsHeader(name);
     }
-    
+
     /**
-     * The default behavior of this method is to call encodeURL(String url)
-     * on the wrapped response object.
+     * 同HttpServletResponse#encodeURL(String url)
      */
     @Override
     public String encodeURL(String url) {
@@ -65,8 +54,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behavior of this method is to return encodeRedirectURL(String url)
-     * on the wrapped response object.
+     * 同HttpServletResponse#encodeRedirectURL(String url)
      */
     @Override
     public String encodeRedirectURL(String url) {
@@ -74,34 +62,25 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behavior of this method is to call encodeUrl(String url)
-     * on the wrapped response object.
-     *
-     * @deprecated As of version 2.1, use {@link #encodeURL(String url)}
-     * instead
+     * 同HttpServletResponse#encodeUrl(String url)
      */
     @Deprecated
     @Override
     public String encodeUrl(String url) {
         return this._getHttpServletResponse().encodeUrl(url);
     }
-    
+
     /**
-     * The default behavior of this method is to return
-     * encodeRedirectUrl(String url) on the wrapped response object.
-     *
-     * @deprecated As of version 2.1, use 
-     * {@link #encodeRedirectURL(String url)} instead
+     * 同HttpServletResponse#encodeRedirectUrl(String url)
      */
     @Deprecated
     @Override
     public String encodeRedirectUrl(String url) {
         return this._getHttpServletResponse().encodeRedirectUrl(url);
     }
-    
+
     /**
-     * The default behavior of this method is to call sendError(int sc, String msg)
-     * on the wrapped response object.
+     * 同HttpServletResponse#sendError(int sc, String msg)
      */
     @Override
     public void sendError(int sc, String msg) throws IOException {
@@ -109,8 +88,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behavior of this method is to call sendError(int sc)
-     * on the wrapped response object.
+     * 同HttpServletResponse#sendError(int sc)
      */
     @Override
     public void sendError(int sc) throws IOException {
@@ -118,62 +96,55 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behavior of this method is to return sendRedirect(String location)
-     * on the wrapped response object.
+     * 同HttpServletResponse#sendRedirect(String location)
      */
     @Override
     public void sendRedirect(String location) throws IOException {
         this._getHttpServletResponse().sendRedirect(location);
     }
-    
+
     /**
-     * The default behavior of this method is to call setDateHeader(String name, long date)
-     * on the wrapped response object.
+     * 同HttpServletResponse#setDateHeader(String name, long date)
      */
     @Override
     public void setDateHeader(String name, long date) {
         this._getHttpServletResponse().setDateHeader(name, date);
     }
-    
+
     /**
-     * The default behavior of this method is to call addDateHeader(String name, long date)
-     * on the wrapped response object.
+     * 同HttpServletResponse#addDateHeader(String name, long date)
      */
     @Override
     public void addDateHeader(String name, long date) {
         this._getHttpServletResponse().addDateHeader(name, date);
     }
-    
+
     /**
-     * The default behavior of this method is to return setHeader(String name, String value)
-     * on the wrapped response object.
+     * 同HttpServletResponse#setHeader(String name, String value)
      */
     @Override
     public void setHeader(String name, String value) {
         this._getHttpServletResponse().setHeader(name, value);
     }
-    
+
     /**
-     * The default behavior of this method is to return addHeader(String name, String value)
-     * on the wrapped response object.
+     * 同HttpServletResponse#addHeader(String name, String value)
      */
     @Override
     public void addHeader(String name, String value) {
         this._getHttpServletResponse().addHeader(name, value);
     }
-    
+
     /**
-     * The default behavior of this method is to call setIntHeader(String name, int value)
-     * on the wrapped response object.
+     * 同HttpServletResponse#setIntHeader(String name, int value)
      */
     @Override
     public void setIntHeader(String name, int value) {
         this._getHttpServletResponse().setIntHeader(name, value);
     }
-    
+
     /**
-     * The default behavior of this method is to call addIntHeader(String name, int value)
-     * on the wrapped response object.
+     * 同HttpServletResponse#addIntHeader(String name, int value)
      */
     @Override
     public void addIntHeader(String name, int value) {
@@ -181,8 +152,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behavior of this method is to call setStatus(int sc)
-     * on the wrapped response object.
+     * 同HttpServletResponse#setStatus(int sc)
      */
     @Override
     public void setStatus(int sc) {
@@ -190,13 +160,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
     
     /**
-     * The default behavior of this method is to call
-     * setStatus(int sc, String sm) on the wrapped response object.
-     *
-     * @deprecated As of version 2.1, due to ambiguous meaning of the 
-     * message parameter. To set a status code 
-     * use {@link #setStatus(int)}, to send an error with a description
-     * use {@link #sendError(int, String)}
+     * 同HttpServletResponse#setStatus(int sc, String sm)
      */
     @Deprecated
     @Override
@@ -205,11 +169,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behaviour of this method is to call
-     * {@link HttpServletResponse#getStatus} on the wrapped response
-     * object.
-     *
-     * @return the current status code of the wrapped response
+     * 同HttpServletResponse#getStatus
      */
     @Override
     public int getStatus() {
@@ -217,17 +177,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behaviour of this method is to call
-     * {@link HttpServletResponse#getHeader} on the wrapped response
-     * object.
-     *
-     * @param name the name of the response header whose value to return
-     *
-     * @return the value of the response header with the given name,
-     * or <tt>null</tt> if no header with the given name has been set
-     * on the wrapped response
-     *
-     * @since Servlet 3.0
+     * 同HttpServletResponse#getHeader(String name)
      */
     @Override
     public String getHeader(String name) {
@@ -235,37 +185,15 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behaviour of this method is to call
-     * {@link HttpServletResponse#getHeaders} on the wrapped response
-     * object.
-     *
-     * <p>Any changes to the returned <code>Collection</code> must not 
-     * affect this <code>HttpServletResponseWrapper</code>.
-     *
-     * @param name the name of the response header whose values to return
-     *
-     * @return a (possibly empty) <code>Collection</code> of the values
-     * of the response header with the given name
-     *
-     * @since Servlet 3.0
-     */                        
+     * 同HttpServletResponse#getHeaders(String name)
+     */                      
     @Override
     public Collection<String> getHeaders(String name) {
         return _getHttpServletResponse().getHeaders(name);
     }
 
     /**
-     * The default behaviour of this method is to call
-     * {@link HttpServletResponse#getHeaderNames} on the wrapped response
-     * object.
-     *
-     * <p>Any changes to the returned <code>Collection</code> must not 
-     * affect this <code>HttpServletResponseWrapper</code>.
-     *
-     * @return a (possibly empty) <code>Collection</code> of the names
-     * of the response headers
-     *
-     * @since Servlet 3.0
+     * 同HttpServletResponse#getHeaderNames
      */
     @Override
     public Collection<String> getHeaderNames() {
@@ -273,13 +201,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behaviour of this method is to call
-     * {@link HttpServletResponse#setTrailerFields} on the wrapped response
-     * object.
-     *
-     * @param supplier of trailer headers
-     *
-     * @since Servlet 4.0
+     * 同HttpServletResponse#setTrailerFields
      */
     @Override
     public void setTrailerFields(Supplier<Map<String, String>> supplier) {
@@ -287,13 +209,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     }
 
     /**
-     * The default behaviour of this method is to call
-     * {@link HttpServletResponse#getTrailerFields} on the wrapped response
-     * object.
-     *
-     * @return supplier of trailer headers
-     *
-     * @since Servlet 4.0
+     * 同HttpServletResponse#getTrailerFields
      */
     @Override
     public Supplier<Map<String, String>> getTrailerFields() {

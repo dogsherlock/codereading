@@ -9,54 +9,39 @@ import java.util.StringTokenizer;
 import java.io.IOException;
 
 /**
- * @deprecated		As of Java(tm) Servlet API 2.3. 
- *			These methods were only useful
- *			with the default encoding and have been moved
- *			to the request interfaces.
- *
+ * @deprecated As of Java(tm) Servlet API 2.3.
+ * 
+ * 这些方法对于默认编码有用，被移到了请求相关接口.
  */
 @Deprecated
 public class HttpUtils {
+    /**
+    * base name of resources bundle
+    */
+    private static final String LSTRING_FILE = 
+    "javax.servlet.http.LocalStrings";
 
-    private static final String LSTRING_FILE =
-	"javax.servlet.http.LocalStrings";
+    /**
+     * 错误信息国际化
+     */
     private static ResourceBundle lStrings =
 	ResourceBundle.getBundle(LSTRING_FILE);
         
-    
     /**
-     * Constructs an empty <code>HttpUtils</code> object.
+     * 无参构造器.
      */
     public HttpUtils() {}
-    
 
     /**
-     * Parses a query string passed from the client to the
-     * server and builds a <code>HashTable</code> object
-     * with key-value pairs. 
-     * The query string should be in the form of a string
-     * packaged by the GET or POST method, that is, it
-     * should have key-value pairs in the form <i>key=value</i>,
-     * with each pair separated from the next by a &amp; character.
+     * 解析客户端发给服务器的查询字符串，构建一个拥有key-value对的HashTable对象.
      *
-     * <p>A key can appear more than once in the query string
-     * with different values. However, the key appears only once in 
-     * the hashtable, with its value being
-     * an array of strings containing the multiple values sent
-     * by the query string.
+     * 在查询字符串中，一个key可能有多个值，使用HashTable存储key-values.
      * 
-     * <p>The keys and values in the hashtable are stored in their
-     * decoded form, so
-     * any + characters are converted to spaces, and characters
-     * sent in hexadecimal notation (like <i>%xx</i>) are
-     * converted to ASCII characters.
+     * 在hashtable中key和value是以解码形式存储，所以任何+字符被转换成空格，
+     * 以十六进制发送的字符会被转换成对应的ASCII字符.
+     * 如(%32->'2'， %2f->'/').
      *
-     * @param s		a string containing the query to be parsed
-     *
-     * @return		a <code>HashTable</code> object built
-     * 			from the parsed key-value pairs
-     *
-     * @exception IllegalArgumentException if the query string is invalid
+     * @exception IllegalArgumentException 查询字符串是无效的
      */
     public static Hashtable<String, String[]> parseQueryString(String s) {
 
@@ -68,131 +53,100 @@ public class HttpUtils {
 
         Hashtable<String, String[]> ht = new Hashtable<String, String[]>();
         StringBuilder sb = new StringBuilder();
+        // 将查询字符串按照&进行切分成tokens.
         StringTokenizer st = new StringTokenizer(s, "&");
         while (st.hasMoreTokens()) {
-        String pair = st.nextToken();
-        int pos = pair.indexOf('=');
-        if (pos == -1) {
-            // XXX
-            // should give more detail about the illegal argument
-            throw new IllegalArgumentException();
-        }
-        String key = parseName(pair.substring(0, pos), sb);
-        String val = parseName(pair.substring(pos+1, pair.length()), sb);
-        if (ht.containsKey(key)) {
-            String oldVals[] = ht.get(key);
-            valArray = new String[oldVals.length + 1];
-            for (int i = 0; i < oldVals.length; i++) {
-                valArray[i] = oldVals[i];
+            String pair = st.nextToken();
+            int pos = pair.indexOf('=');
+            // 不符合key=value格式
+            if (pos == -1) {
+                // XXX
+                // should give more detail about the illegal argument
+                throw new IllegalArgumentException();
             }
-            valArray[oldVals.length] = val;
-        } else {
-            valArray = new String[1];
-            valArray[0] = val;
+            // 使用parseName对name和value进行解析.
+            String key = parseName(pair.substring(0, pos), sb);
+            String val = parseName(pair.substring(pos+1, pair.length()), sb);
+            if (ht.containsKey(key)) {
+                String oldVals[] = ht.get(key);
+                valArray = new String[oldVals.length + 1];
+                for (int i = 0; i < oldVals.length; i++) {
+                    valArray[i] = oldVals[i];
+                }
+                valArray[oldVals.length] = val;
+            } else {
+                valArray = new String[1];
+                valArray[0] = val;
+            }
+            ht.put(key, valArray);
         }
-        ht.put(key, valArray);
+	    return ht;
     }
-
-	return ht;
-    }
-
 
     /**
+     * 解析客户端使用HTTP POST方法和MIME类型为application/x-www-form-urlencoded
+     * 发给服务器的表单数据.
      *
-     * Parses data from an HTML form that the client sends to 
-     * the server using the HTTP POST method and the 
-     * <i>application/x-www-form-urlencoded</i> MIME type.
+     * @param len ServletInputStream发送的字节数
      *
-     * <p>The data sent by the POST method contains key-value
-     * pairs. A key can appear more than once in the POST data
-     * with different values. However, the key appears only once in 
-     * the hashtable, with its value being
-     * an array of strings containing the multiple values sent
-     * by the POST method.
-     *
-     * <p>The keys and values in the hashtable are stored in their
-     * decoded form, so
-     * any + characters are converted to spaces, and characters
-     * sent in hexadecimal notation (like <i>%xx</i>) are
-     * converted to ASCII characters.
-     *
-     * @param len	an integer specifying the length,
-     *			in characters, of the 
-     *			<code>ServletInputStream</code>
-     *			object that is also passed to this
-     *			method
-     *
-     * @param in	the <code>ServletInputStream</code>
-     *			object that contains the data sent
-     *			from the client
-     * 
-     * @return		a <code>HashTable</code> object built
-     *			from the parsed key-value pairs
-     *
-     * @exception IllegalArgumentException if the data
-     * sent by the POST method is invalid
+     * @exception IllegalArgumentException POST方法发送的数据无效.
      */
     public static Hashtable<String, String[]> parsePostData(int len, 
                 ServletInputStream in) {
-	// XXX
-	// should a length of 0 be an IllegalArgumentException
-	
-	if (len <=0) {
+        if (len <=0) {
             // cheap hack to return an empty hash
-	    return new Hashtable<String, String[]>(); 
+            return new Hashtable<String, String[]>(); 
         }
 
-	if (in == null) {
-	    throw new IllegalArgumentException();
-	}
+        if (in == null) {
+            throw new IllegalArgumentException();
+        }
 	
-	//
-	// Make sure we read the entire POSTed body.
-	//
+        //
+        // 确保读取完整的POST请求体内容.
+        //
         byte[] postedBytes = new byte [len];
         try {
             int offset = 0;
-       
-	    do {
-		int inputLen = in.read (postedBytes, offset, len - offset);
-		if (inputLen <= 0) {
-		    String msg = lStrings.getString("err.io.short_read");
-		    throw new IllegalArgumentException (msg);
-		}
-		offset += inputLen;
-	    } while ((len - offset) > 0);
+            do {
+                int inputLen = in.read(postedBytes, offset, len - offset);
+                // len此处不为0，则至少读取一个字节或者返回-1.inputLen不可能为0.
+                if (inputLen <= 0) {
+                    String msg = lStrings.getString("err.io.short_read");
+                    // msg = "Short Read";
+                    throw new IllegalArgumentException (msg);
+                }
+                offset += inputLen;
+            } while ((len - offset) > 0);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
 
-	} catch (IOException e) {
-	    throw new IllegalArgumentException(e.getMessage());
-	}
-
-        // XXX we shouldn't assume that the only kind of POST body
-        // is FORM data encoded using ASCII or ISO Latin/1 ... or
-        // that the body should always be treated as FORM data.
-        //
-
+        // XXX 我们不能认定POST请求体只可能是用ASCII/ISO Latin/1编码
+        // 的表单数据
         try {
+            // 使用iso8859-1解码字节数据.
             String postedBody = new String(postedBytes, 0, len, "8859_1");
             return parseQueryString(postedBody);
         } catch (java.io.UnsupportedEncodingException e) {
-            // XXX function should accept an encoding parameter & throw this
-            // exception.  Otherwise throw something expected.
+            // XXX 不支持此编码格式，此方法也许可以接受一个指定编码格式的参数.
             throw new IllegalArgumentException(e.getMessage());
         }
     }
 
-
     /*
-     * Parse a name in the query string.
+     * 解析查询字符串中的name.
      */
     private static String parseName(String s, StringBuilder sb) {
         sb.setLength(0);
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i); 
             switch (c) {
+                // '+' -> ' '
                 case '+':
                     sb.append(' ');
                     break;
+                // '%xx' -> 'the associated ascii value.' 
                 case '%':
                     try {
                         sb.append((char) Integer.parseInt(s.substring(i+1, i+3), 
@@ -219,27 +173,13 @@ public class HttpUtils {
         return sb.toString();
     }
 
-
     /**
-     *
-     * Reconstructs the URL the client used to make the request,
-     * using information in the <code>HttpServletRequest</code> object.
-     * The returned URL contains a protocol, server name, port
-     * number, and server path, but it does not include query
-     * string parameters.
+     * 利用HttpServletRequest对象中的信息返回客户端发送请求的URL.
+     * 返回的URL如scheme://host[:port]/path，不包含查询字符串参数.
      * 
-     * <p>Because this method returns a <code>StringBuffer</code>,
-     * not a string, you can modify the URL easily, for example,
-     * to append query parameters.
-     *
-     * <p>This method is useful for creating redirect messages
-     * and for reporting errors.
-     *
-     * @param req	a <code>HttpServletRequest</code> object
-     *			containing the client's request
+     * 此方法返回StringBuffer对象，你可以轻松改变URL，如添加查询字符串.
      * 
-     * @return		a <code>StringBuffer</code> object containing
-     *			the reconstructed URL
+     * 见HttpServletRequest#getRequestURL
      */
     public static StringBuffer getRequestURL (HttpServletRequest req) {
         StringBuffer url = new StringBuffer();
@@ -249,14 +189,16 @@ public class HttpUtils {
 
         //String		servletPath = req.getServletPath ();
         //String		pathInfo = req.getPathInfo ();
-
+        
         url.append (scheme);		// http, https
         url.append ("://");
         url.append (req.getServerName ());
+        // 如果使用的协议默认端口，则不添加，否则，添加.
         if ((scheme.equals ("http") && port != 80)
         || (scheme.equals ("https") && port != 443)) {
             url.append (':');
-            url.append (req.getServerPort ());
+            // url.append(port);
+            url.append (req.getServerPort());
         }
         //if (servletPath != null)
         //    url.append (servletPath);
