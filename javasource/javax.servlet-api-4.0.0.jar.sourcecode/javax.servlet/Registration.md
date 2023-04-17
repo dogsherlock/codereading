@@ -6,142 +6,77 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Interface through which a {@link Servlet} or {@link Filter} may be
- * further configured.
+ * 通过Registration接口，servlet和filter可以进一步配置.
  *
- * <p>A Registration object whose {@link #getClassName} method returns null
- * is considered <i>preliminary</i>. Servlets and Filters whose implementation
- * class is container implementation specific may be declared without
- * any <tt>servlet-class</tt> or <tt>filter-class</tt> elements, respectively,
- * and will be represented as preliminary Registration objects. 
- * Preliminary registrations must be completed by calling one of the
- * <tt>addServlet</tt> or <tt>addFilter</tt> methods on
- * {@link ServletContext}, and passing in the Servlet or Filter name 
- * (obtained via {@link #getName}) along with the supporting Servlet or Filter
- * implementation class name, Class object, or instance, respectively.
- * In most cases, preliminary registrations will be completed by an
- * appropriate, container-provided {@link ServletContainerInitializer}.
- *
- * @since Servlet 3.0
+ * Registration obj初始化情况下#getClassName方法返回null.由特定容器实现的servlet
+ * 和filter类可能没有声明<servlet-class>或<filter-class>标签，并且会被表示为
+ * 初步的Registration obj. 初步注册必须调用在ServletContext obj上的
+ * #addServlet或#addFilter方法来完成.并且要通过#getName传入servlet或filter的名字以及
+ * 支持servlet或filter实现类的name和类对象，或者实例.在大多数情况下，初步注册将会通过容器
+ * 提供的实现ServletContainerInitializer接口的类来完成.
  */
 public interface Registration {
 
     /**
-     * Gets the name of the Servlet or Filter that is represented by this
-     * Registration.
-     *
-     * @return the name of the Servlet or Filter that is represented by this
-     * Registration
+     * 获取由Registration obj代表的servlet或filter的name.
      */
     public String getName();
 
     /**
-     * Gets the fully qualified class name of the Servlet or Filter that
-     * is represented by this Registration.
-     *
-     * @return the fully qualified class name of the Servlet or Filter
-     * that is represented by this Registration, or null if this
-     * Registration is preliminary
+     * 获取由Registration obj代表的servlet或filter的全限定类名.
      */
     public String getClassName();
 
     /**
-     * Sets the initialization parameter with the given name and value
-     * on the Servlet or Filter that is represented by this Registration.
+     * 设置由Registration obj代表的servlet或filter的初始参数name/value.
      *
-     * @param name the initialization parameter name
-     * @param value the initialization parameter value
+     * @return 如果设置成功，返回true.也就是初始参数的name在由Registration obj代表的
+     * servlet或filter中不存在，否则返回false.
      *
-     * @return true if the update was successful, i.e., an initialization
-     * parameter with the given name did not already exist for the Servlet
-     * or Filter represented by this Registration, and false otherwise
+     * @throws IllegalStateException 如果ServletContext已经被初始化.
      *
-     * @throws IllegalStateException if the ServletContext from which this
-     * Registration was obtained has already been initialized
-     * @throws IllegalArgumentException if the given name or value is
-     * <tt>null</tt>
+     * @throws IllegalArgumentException name或value为null.
      */ 
     public boolean setInitParameter(String name, String value);
 
     /**
-     * Gets the value of the initialization parameter with the given name
-     * that will be used to initialize the Servlet or Filter represented
-     * by this Registration object.
-     *
-     * @param name the name of the initialization parameter whose value is
-     * requested
-     *
-     * @return the value of the initialization parameter with the given
-     * name, or <tt>null</tt> if no initialization parameter with the given
-     * name exists
+     * 使用给定的name获取初始化参数value.
      */ 
     public String getInitParameter(String name);
 
     /**
-     * Sets the given initialization parameters on the Servlet or Filter
-     * that is represented by this Registration.
+     * 批量设置初始化参数.
      *
-     * <p>The given map of initialization parameters is processed
-     * <i>by-value</i>, i.e., for each initialization parameter contained
-     * in the map, this method calls {@link #setInitParameter(String,String)}.
-     * If that method would return false for any of the
-     * initialization parameters in the given map, no updates will be
-     * performed, and false will be returned. Likewise, if the map contains
-     * an initialization parameter with a <tt>null</tt> name or value, no
-     * updates will be performed, and an IllegalArgumentException will be
-     * thrown.
+     * 对于map中每个初始化参数都会调用#setInitParameter(String,String).
+     * 如果方法返回false，则不会更新.如果初始化参数的name或value是null，
+     * 则抛出IllegalArgumentException异常.
      *
-     * <p>The returned set is not backed by the {@code Registration} object,
-     * so changes in the returned set are not reflected in the
-     * {@code Registration} object, and vice-versa.</p>
+     * @param initParameters 初始化参数
      *
-     * @param initParameters the initialization parameters
+     * @return 初始化参数name冲突的集合(可能为空) 
      *
-     * @return the (possibly empty) Set of initialization parameter names
-     * that are in conflict
+     * @throws IllegalStateException 如果ServletContext已经被初始化.
      *
-     * @throws IllegalStateException if the ServletContext from which this
-     * Registration was obtained has already been initialized
-     * @throws IllegalArgumentException if the given map contains an
-     * initialization parameter with a <tt>null</tt> name or value
+     * @throws IllegalArgumentException 如果参数map包含的初始化参数name或value为null.
      */ 
     public Set<String> setInitParameters(Map<String, String> initParameters);
 
     /**
-     * Gets an immutable (and possibly empty) Map containing the
-     * currently available initialization parameters that will be used to
-     * initialize the Servlet or Filter represented by this Registration
-     * object.
-     *
-     * @return Map containing the currently available initialization
-     * parameters that will be used to initialize the Servlet or Filter
-     * represented by this Registration object
+     * 返回Registration obj中包含当前可用的初始化参数的不可变map(可能为空).
      */ 
     public Map<String, String> getInitParameters();
 
     /**
-     * Interface through which a {@link Servlet} or {@link Filter} registered
-     * via one of the <tt>addServlet</tt> or <tt>addFilter</tt> methods,
-     * respectively, on {@link ServletContext} may be further configured.
+     * 通过接口servlet或filter分别可以通过addServlet方法或addFilter方法注册，在
+     * ServletContext进一步配置.
      */
     interface Dynamic extends Registration {
 
         /**
-         * Configures the Servlet or Filter represented by this dynamic
-         * Registration as supporting asynchronous operations or not.
+         * 配置表示servlet或filter的动态Registration obj是否支持异步操作.
+         * 默认不支持.调用此方法会覆盖从前的设置.
          *
-         * <p>By default, servlet and filters do not support asynchronous
-         * operations.
-         *
-         * <p>A call to this method overrides any previous setting.
-         *
-         * @param isAsyncSupported true if the Servlet or Filter represented
-         * by this dynamic Registration supports asynchronous operations,
-         * false otherwise
-         *
-         * @throws IllegalStateException if the ServletContext from which
-         * this dynamic Registration was obtained has already been
-         * initialized
+         * @throws IllegalStateException 如果ServletContext已经被初始化.
          */
         public void setAsyncSupported(boolean isAsyncSupported);
     }

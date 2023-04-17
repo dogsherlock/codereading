@@ -5,106 +5,60 @@ package javax.servlet;
 import java.util.*;
 
 /**
- * Interface through which a {@link Filter} may be further configured.
- *
- * @since Servlet 3.0
+ * 通过此接口可以进一步配置filter.
  */
 public interface FilterRegistration extends Registration {
 
     /**
-     * Adds a filter mapping with the given servlet names and dispatcher
-     * types for the Filter represented by this FilterRegistration.
+     * 添加FilterRegistration关联的Filter到Servlet的映射，
+     * 使用Servlet Name、DispatcherType作为映射。isMatchAfter
+     * 表示新添加的Mapping是在已有的Mapping之前还是之后
      *
-     * <p>Filter mappings are matched in the order in which they were
-     * added.
+     * 过滤器映射关系根据添加的顺序匹配.
      * 
-     * <p>Depending on the value of the <tt>isMatchAfter</tt> parameter, the
-     * given filter mapping will be considered after or before any
-     * <i>declared</i> filter mappings of the ServletContext from which this
-     * FilterRegistration was obtained.
+     * 多次调用此方法，会影响之前的映射关系.
      *
-     * <p>If this method is called multiple times, each successive call
-     * adds to the effects of the former.
+     * @param dispatcherTypes 如果为null，则默认使用DispatcherType.REQUEST.
+     * 
+     * @param isMatchAfter 新添加的Mapping是在已有的Mapping之前还是之后
+     * 
+     * @param servletNames servlet names.
      *
-     * @param dispatcherTypes the dispatcher types of the filter mapping,
-     * or null if the default <tt>DispatcherType.REQUEST</tt> is to be used
-     * @param isMatchAfter true if the given filter mapping should be matched
-     * after any declared filter mappings, and false if it is supposed to
-     * be matched before any declared filter mappings of the ServletContext
-     * from which this FilterRegistration was obtained
-     * @param servletNames the servlet names of the filter mapping
-     *
-     * @throws IllegalArgumentException if <tt>servletNames</tt> is null or
-     * empty
-     * @throws IllegalStateException if the ServletContext from which this
-     * FilterRegistration was obtained has already been initialized
+     * @throws IllegalArgumentException 如果servletNames为null或者为空.
+     * 
+     * @throws IllegalStateException 如果ServletContext已经被初始化.
      */
     public void addMappingForServletNames(
         EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
         String... servletNames);
 
     /**
-     * Gets the currently available servlet name mappings
-     * of the Filter represented by this <code>FilterRegistration</code>.
-     *
-     * <p>If permitted, any changes to the returned <code>Collection</code> must not 
-     * affect this <code>FilterRegistration</code>.
-     *
-     * @return a (possibly empty) <code>Collection</code> of the currently
-     * available servlet name mappings of the Filter represented by this
-     * <code>FilterRegistration</code>
+     * 获取当前FilterRegistration关联的Filter已存在的servlet name的映射.
      */
     public Collection<String> getServletNameMappings();
 
     /**
-     * Adds a filter mapping with the given url patterns and dispatcher
-     * types for the Filter represented by this FilterRegistration.
+     * 添加FilterRegistration关联的Filter到Servlet的映射，使用
+     * URL patterns、DispatcherType作为映射.isMatchAfter表示
+     * 新添加的Mapping是在已有的Mapping之前还是之后.
      *
-     * <p>Filter mappings are matched in the order in which they were
-     * added.
-     * 
-     * <p>Depending on the value of the <tt>isMatchAfter</tt> parameter, the
-     * given filter mapping will be considered after or before any
-     * <i>declared</i> filter mappings of the ServletContext from which
-     * this FilterRegistration was obtained.
+     * 此方法与#addMappingForServletNames类似
      *
-     * <p>If this method is called multiple times, each successive call
-     * adds to the effects of the former.
+     * @throws IllegalArgumentException urlPatterns为null或者为空.
      *
-     * @param dispatcherTypes the dispatcher types of the filter mapping,
-     * or null if the default <tt>DispatcherType.REQUEST</tt> is to be used
-     * @param isMatchAfter true if the given filter mapping should be matched
-     * after any declared filter mappings, and false if it is supposed to
-     * be matched before any declared filter mappings of the ServletContext
-     * from which this FilterRegistration was obtained
-     * @param urlPatterns the url patterns of the filter mapping
-     *
-     * @throws IllegalArgumentException if <tt>urlPatterns</tt> is null or
-     * empty
-     * @throws IllegalStateException if the ServletContext from which this
-     * FilterRegistration was obtained has already been initialized
+     * @throws IllegalStateException 如果ServletContext已经被初始化.
      */
     public void addMappingForUrlPatterns(
         EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
         String... urlPatterns);
 
     /**
-     * Gets the currently available URL pattern mappings of the Filter
-     * represented by this <code>FilterRegistration</code>.
-     *
-     * <p>If permitted, any changes to the returned <code>Collection</code> must not 
-     * affect this <code>FilterRegistration</code>.
-     *
-     * @return a (possibly empty) <code>Collection</code> of the currently
-     * available URL pattern mappings of the Filter represented by this
-     * <code>FilterRegistration</code>
+     * 获取当前FilterRegistration关联的Filter已存在的url patterns的映射.
      */
     public Collection<String> getUrlPatternMappings();
 
     /**
-     * Interface through which a {@link Filter} registered via one of the
-     * <tt>addFilter</tt> methods on {@link ServletContext} may be further
-     * configured.
+     * 此接口用于在ServletContext上通过addFilter方法注册的filter进一步配置.
      */
     interface Dynamic extends FilterRegistration, Registration.Dynamic {
     }
