@@ -3,6 +3,8 @@
 > 应用场景有权限认证、敏感词过滤、压缩响应等.
 
 **在web.xml中配置过滤器**
+* eg1:
+
 ```xml
 <filter>
     <!-- 过滤器名称 -->
@@ -17,6 +19,9 @@
 <init-param>
 <!-- 过滤器映射 -->
 <filter-mapping>
+    <!-- 
+    此处没有指定<dispatcher>内容, 默认的是dipatcher type是REQUEST 
+    -->
     <filter-name>loginFilter</filter-name>
     <!-- 指定过滤器作用的对象 -->
     <url-pattern>*.jsp</url-pattern>
@@ -24,6 +29,31 @@
 <filter-mapping>
     <filter-name>loginFilter</filter-name>
     <url-pattern>*.do</url-pattern>
+</filter-mapping>
+```
+
+* eg2:
+
+这种情况下，如果请求是通过request dispatcher的include方法传递过来
+的对ProductServlet的请求，则要经过这个过滤器的过滤.其它的诸如从客
+户端直接过来的对ProductServlet的请求等都不需要经过这个过滤器.
+```xml
+<filter-mapping>   
+    <filter-name>Logging Filter</filter-name>   
+    <servlet-name>ProductServlet</servlet-name>   
+    <dispatcher>INCLUDE</dispatcher>   
+</filter-mapping>
+```
+
+* eg3:
+在这种情况下，如果请求是以/products/…开头的，并且是通过request 
+dispatcher的forward方法传递过来或者直接从客户端传递过来的，则必须经过这个过滤器.  
+```xml
+<filter-mapping>   
+    <filter-name>Logging Filter</filter-name>   
+    <url-pattern>/products/*</url-pattern>   
+    <dispatcher>FORWARD</dispatcher>   
+    <dispatcher>REQUEST</dispatcher>   
 </filter-mapping>
 ```
 
