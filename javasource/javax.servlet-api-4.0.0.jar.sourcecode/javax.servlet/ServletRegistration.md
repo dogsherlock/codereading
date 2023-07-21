@@ -31,7 +31,7 @@ public interface ServletRegistration extends Registration {
     public Collection<String> getMappings();
 
     /**
-     * 获取由ServletRegistration表示的Servlet的runAs role信息.
+     * 获取由ServletRegistration表示的Servlet的runAs信息.
      */
     public String getRunAsRole();
 
@@ -59,88 +59,52 @@ public interface ServletRegistration extends Registration {
         public void setLoadOnStartup(int loadOnStartup);
 
         /**
-         * Sets the {@link ServletSecurityElement} to be applied to the
-         * mappings defined for this <code>ServletRegistration</code>.
+         * 设置被应用于ServletRegistration定义的映射上的ServletSecurityElement.
          *
-         * <p>This method applies to all mappings added to this
-         * <code>ServletRegistration</code> up until the point that the
-         * <code>ServletContext</code> from which it was obtained has been
-         * initialized.
+         * 此方法在ServletContext(从它获取的ServletRegistration)被初始化之前
+         * 会应用到添加到ServletRegistration的所有映射.
          * 
-         * <p>If a URL pattern of this ServletRegistration is an exact target
-         * of a <code>security-constraint</code> that was established via
-         * the portable deployment descriptor, then this method does not
-         * change the <code>security-constraint</code> for that pattern,
-         * and the pattern will be included in the return value.
+         * 如果ServletRegistration的某个url pattern恰好通过ServletSecurity注解
+         * 设置了安全约束，或者在之前调用过这个方法，那么此方法会替换这个url pattern
+         * 的安全约束.
          * 
-         * <p>If a URL pattern of this ServletRegistration is an exact
-         * target of a security constraint that was established via the
-         * {@link javax.servlet.annotation.ServletSecurity} annotation
-         * or a previous call to this method, then this method replaces
-         * the security constraint for that pattern.
-         * 
-         * <p>If a URL pattern of this ServletRegistration is neither the
-         * exact target of a security constraint that was established via
-         * the {@link javax.servlet.annotation.ServletSecurity} annotation
-         * or a previous call to this method, nor the exact target of a
-         * <code>security-constraint</code> in the portable deployment
-         * descriptor, then this method establishes the security constraint
-         * for that pattern from the argument
-         * <code>ServletSecurityElement</code>.
+         * 如果某个url pattern没有通过ServletSecurity注解、<security-constraint>部署描述符、
+         * 在之前调用此方法这些方式设置其安全约束，那么此方法通过参数ServletSecurityElement
+         * 为其设置安全约束.
          *
-         * <p>The returned set is not backed by the {@code Dynamic} object,
-         * so changes in the returned set are not reflected in the
-         * {@code Dynamic} object, and vice-versa.</p>
+         * 返回的集合不是来源于Dynamic obj，所以两者的相互改变都不会影响另一个.
          * 
-         * @param constraint the {@link ServletSecurityElement} to be applied
-         * to the patterns mapped to this ServletRegistration
+         * @param constraint 传递被施加在此ServletRegistration映射的url patterns上的
+         * 安全约束.
          * 
-         * @return the (possibly empty) Set of URL patterns that were already
-         * the exact target of a <code>security-constraint</code> that was
-         * established via the portable deployment descriptor. This method
-         * has no effect on the patterns included in the returned set
+         * @return 已经通过<security-constraint>部署描述符建立安全约束的url patterns集合.
+         * 此方法对返回集合的url patterns没有影响.
          * 
-         * @throws IllegalArgumentException if <tt>constraint</tt> is null
+         * @throws IllegalArgumentException 如果constraint为null.
          * 
-         * @throws IllegalStateException if the {@link ServletContext} from
-         * which this <code>ServletRegistration</code> was obtained has
-         * already been initialized 
+         * @throws IllegalStateException 如果ServletContext已经被初始化.
          */
         public Set<String> setServletSecurity(ServletSecurityElement constraint);
 
         /**
-         * Sets the {@link MultipartConfigElement} to be applied to the
-         * mappings defined for this <code>ServletRegistration</code>. If this
-         * method is called multiple times, each successive call overrides the
-         * effects of the former.
+         * 设置由ServletRegistration定义的映射上被应用的MultipartConfigElement.
+         * 如果多次调用此方法，则会覆盖前面的调用.
          *
-         * @param multipartConfig the {@link MultipartConfigElement} to be
-         * applied to the patterns mapped to the registration
+         * @throws IllegalArgumentException multipartConfig为null.
          *
-         * @throws IllegalArgumentException if <tt>multipartConfig</tt> is
-         * null
-         *
-         * @throws IllegalStateException if the {@link ServletContext} from
-         * which this ServletRegistration was obtained has already been
-         * initialized
+         * @throws IllegalStateException 如果ServletContext已经被初始化.
          */
         public void setMultipartConfig(
             MultipartConfigElement multipartConfig);
 
         /**
-         * Sets the name of the <code>runAs</code> role for this
-         * <code>ServletRegistration</code>.
+         * 为ServletRegistration设置runAs角色名.
          *
-         * @param roleName the name of the <code>runAs</code> role
+         * @throws IllegalArgumentException roleName为null.
          *
-         * @throws IllegalArgumentException if <tt>roleName</tt> is null
-         *
-         * @throws IllegalStateException if the {@link ServletContext} from
-         * which this ServletRegistration was obtained has already been
-         * initialized
+         * @throws IllegalStateException 如果ServletContext已经被初始化.
          */
         public void setRunAsRole(String roleName);
-
     }
 }
 ```

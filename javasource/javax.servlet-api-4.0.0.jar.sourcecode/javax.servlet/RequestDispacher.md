@@ -7,7 +7,6 @@ import java.io.IOException;
 /**
  * RequestDispatcher从客户端接收请求,并将其发送到服务器上的资源(例如Servlet, HTML文件, JSP文件)
  */
- 
 public interface RequestDispatcher {
 
     /**

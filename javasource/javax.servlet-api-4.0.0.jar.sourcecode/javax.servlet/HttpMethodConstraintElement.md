@@ -5,38 +5,26 @@ package javax.servlet;
 import javax.servlet.annotation.HttpMethodConstraint;
 
 /**
- * Java Class represntation of an {@link HttpMethodConstraint} annotation value.
- *
- * @since Servlet 3.0
+ * 此类表示HttpMethodConstraint注解的值.
  */
 public class HttpMethodConstraintElement extends HttpConstraintElement {
 
+    // 方法名.
     private String methodName;
 
     /**
-     * Constructs an instance with default {@link HttpConstraintElement}
-     * value.
-     *
-     * @param methodName the name of an HTTP protocol method. The name must
-     * not be null, or the empty string, and must be a legitimate HTTP
-     * Method name as defined by RFC 2616
+     * 构造器，构造一个带有默认HttpConstraintElement值的实例.
      */
     public HttpMethodConstraintElement(String methodName) {
+        // 如果methodName为null或空，则为无效的方法名.
         if (methodName == null || methodName.length() == 0) {
             throw new IllegalArgumentException("invalid HTTP method name");
         }
         this.methodName = methodName;
     }
+
     /**
-     * Constructs an instance with specified {@link HttpConstraintElement}
-     * value.
-     *
-     * @param methodName the name of an HTTP protocol method. The name must
-     * not be null, or the empty string, and must be a legitimate HTTP
-     * Method name as defined by RFC 2616
-     *
-     * @param constraint the HTTPconstraintElement value to assign to the
-     * named HTTP method
+     * 构造一个指定HttpConstraintElement值的实例.
      */
     public HttpMethodConstraintElement(String methodName,
             HttpConstraintElement constraint) {
@@ -50,9 +38,7 @@ public class HttpMethodConstraintElement extends HttpConstraintElement {
     }
 
     /**
-     * Gets the HTTP method name.
-     *
-     * @return the Http method name
+     * 获取HTTP方法名.
      */
     public String getMethodName() {
         return this.methodName;

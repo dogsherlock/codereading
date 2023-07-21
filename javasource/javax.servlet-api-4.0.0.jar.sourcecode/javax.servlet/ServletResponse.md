@@ -180,9 +180,8 @@ public interface ServletResponse {
      * 用于指定本地化与响应编码的映射关系.否则，本地化与编码的对应关系
      * 是依赖于容器的(如tomcat web.xml).
      * 可以多次调用此方法来改变locale.如果response已经提交，调用此方法
-     * 无效果.调用#setContentType指定charset、调用#setCharacterEncoding、
-     * 调用#getWriter、response已经被提交之后调用此方法，不会设置response
-     * 的字符编码.
+     * 无效果.response已经被提交之后再调用#setContentType(charset)、
+     * #setCharacterEncoding、#getWriter，则不会设置response的字符编码.
      * 
      * 如果协议支持，容器必须向客户端说明servlet response使用的字符编码和
      * 语言区域设置.如HTTP协议，可以通过响应头Content-Language来指定locale，

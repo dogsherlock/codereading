@@ -92,7 +92,6 @@ public interface Servlet {
      * Returns information about the servlet, such
      * as author, version, and copycopyrightright.
      */
-
     public String getServletInfo();
 
     /**
