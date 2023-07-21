@@ -9,6 +9,13 @@
 > 器访问的时候，客户端会将此key-value放到cookie中一并请求服务器，服务器就会根据
 > 此ID寻找对应的session对象了
 
+tomcat服务器的conf/web.xml文件中可以配置session的最大不活跃时间:
+```xml
+<session-config>
+    <session-timeout>30</session-timeout>
+</session-config>
+```
+
 ___
 **source code**
 ```java

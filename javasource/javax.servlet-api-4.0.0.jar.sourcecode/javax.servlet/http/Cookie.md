@@ -125,7 +125,7 @@ public class Cookie implements Cloneable, Serializable {
      * 改变.
      * 
      * cookie name需要遵循: 
-     * 非Java保留标记，不区分大小写情况下，不等于Comment、Domain、Expires、Max-Age、
+     * Java保留标记，不区分大小写情况下，不等于Comment、Domain、Expires、Max-Age、
      * Path、Secure、Version、不以$开头.
      * 
      * @throws IllegalArgumentException	如果cookie name为null，空字符串或者含有

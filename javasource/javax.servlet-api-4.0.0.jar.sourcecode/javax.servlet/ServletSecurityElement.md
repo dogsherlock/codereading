@@ -7,19 +7,22 @@ import javax.servlet.annotation.HttpMethodConstraint;
 import javax.servlet.annotation.ServletSecurity;
 
 /**
- * Java Class representation of a {@link ServletSecurity} annotation value.
- *
- * @since Servlet 3.0
+ * 此类用来表示ServletSecurity注解的值.
  */
 public class ServletSecurityElement extends HttpConstraintElement {
-
+    /**
+     * 指定的HTTP方法的约束的方法名集合
+     */
     private Collection<String> methodNames;
+
+    /**
+     * 指定的HTTP方法的约束集合.
+     */
     private Collection<HttpMethodConstraintElement> methodConstraints;
 
     /**
-     * Constructs an instance using the default
-     * <code>HttpConstraintElement</code> value as the default Constraint
-     * element and with no HTTP Method specific constraint elements.
+     * 构造一个使用默认HttpConstraintElement值作为默认约束元素，并且没有
+     * 特定于HTTP方法约束元素的实例.
      */
     public ServletSecurityElement() {
         methodConstraints = new HashSet<HttpMethodConstraintElement>();
@@ -27,12 +30,8 @@ public class ServletSecurityElement extends HttpConstraintElement {
     }
 
     /**
-     * Constructs an instance with a default Constraint element
-     * and with no HTTP Method specific constraint elements.
-     *
-     * @param constraint the HttpConstraintElement to be
-     * applied to all HTTP methods other than those represented in the
-     * <tt>methodConstraints</tt>
+     * 构造一个使用指定HttpConstraintElement值作为约束元素，并且没有
+     * 特定于HTTP方法约束元素的实例.
      */
     public ServletSecurityElement(HttpConstraintElement constraint) {
         super(constraint.getEmptyRoleSemantic(),
@@ -43,16 +42,10 @@ public class ServletSecurityElement extends HttpConstraintElement {
     }
 
     /**
-     * Constructs an instance using the default
-     * <code>HttpConstraintElement</code> value as the default Constraint
-     * element and with a collection of HTTP Method specific constraint
-     * elements.
+     * 构造使用默认HttpConstraintElement值作为默认约束元素，并带有指定方法约束的集合
+     * 的实例.
      *
-     * @param methodConstraints the collection of HTTP method specific
-     * constraint elements
-     *
-     * @throws IllegalArgumentException if duplicate method names are
-     * detected
+     * @throws IllegalArgumentException 如果方法名重复.
      */
     public ServletSecurityElement(
             Collection<HttpMethodConstraintElement> methodConstraints) {
@@ -62,17 +55,10 @@ public class ServletSecurityElement extends HttpConstraintElement {
     }
 
     /**
-     * Constructs an instance with a default Constraint element
-     * and with a collection of HTTP Method specific constraint elements.
+     * 使用指定的constraint(应用于所有http方法)和methodConstraints(应用于
+     * 指定http方法约束的集合)参数构造实例.
      *
-     * @param constraint the HttpConstraintElement to be
-     * applied to all HTTP methods other than those represented in the
-     * <tt>methodConstraints</tt>
-     * @param methodConstraints the collection of HTTP method specific
-     * constraint elements.
-     *
-     * @throws IllegalArgumentException if duplicate method names are
-     * detected
+     * @throws IllegalArgumentException 如果方法名重复.
      */
     public ServletSecurityElement(HttpConstraintElement constraint,
             Collection<HttpMethodConstraintElement> methodConstraints) {
@@ -85,12 +71,9 @@ public class ServletSecurityElement extends HttpConstraintElement {
     }
 
     /**
-     * Constructs an instance from a {@link ServletSecurity} annotation value.
+     * 给定ServletSecurity注解值参数，使用构造器构造实例.
      *
-     * @param annotation the annotation value
-     *
-     * @throws IllegalArgumentException if duplicate method names are
-     * detected
+     * @throws IllegalArgumentException 如果方法名重复.
      */
     public ServletSecurityElement(ServletSecurity annotation) {
         super(annotation.value().value(),
@@ -110,43 +93,29 @@ public class ServletSecurityElement extends HttpConstraintElement {
     }
 
     /**
-     * Gets the (possibly empty) collection of HTTP Method specific
-     * constraint elements.
+     * 返回指定HTTP方法的约束元素的不可变集合(可能为空).
      *
-     * <p>If permitted, any changes to the returned <code>Collection</code> must not
-     * affect this <code>ServletSecurityElement</code>.
-     *
-     *
-     * @return the (possibly empty) collection of HttpMethodConstraintElement
-     * objects
+     * 如果允许，改变返回的集合不能影响此ServletSecurityElement.
      */
     public Collection<HttpMethodConstraintElement> getHttpMethodConstraints() {
         return Collections.unmodifiableCollection(methodConstraints);
     }
 
     /**
-     * Gets the set of HTTP method names named by the HttpMethodConstraints.
-     *
-     *  <p>If permitted, any changes to the returned <code>Collection</code> must not
-     * affect this <code>ServletSecurityElement</code>.
-     *
-
-     *
-     * @return the collection String method names
+     * 返回指定的HTTP方法的约束的方法名的不可变集合
      */
     public Collection<String> getMethodNames() {
         return Collections.unmodifiableCollection(methodNames);
     }
 
     /**
-     * Checks for duplicate method names in methodConstraints.
+     * 检查methodConstraints中重复的方法名.
      *
      * @param methodConstraints
      *
-     * @retrun Set of method names
+     * @retrun 方法名集合.
      *
-     * @throws IllegalArgumentException if duplicate method names are
-     * detected
+     * @throws IllegalArgumentException 如果方法名重复.
      */
     private Collection<String> checkMethodNames(
             Collection<HttpMethodConstraintElement> methodConstraints) {
@@ -154,6 +123,7 @@ public class ServletSecurityElement extends HttpConstraintElement {
         for (HttpMethodConstraintElement methodConstraint :
                         methodConstraints) {
             String methodName = methodConstraint.getMethodName();
+            // HashSet#add(E e)返回false表示集合中元素重复，此时抛出异常.
             if (!methodNames.add(methodName)) {
                 throw new IllegalArgumentException(
                     "Duplicate HTTP method name: " + methodName);

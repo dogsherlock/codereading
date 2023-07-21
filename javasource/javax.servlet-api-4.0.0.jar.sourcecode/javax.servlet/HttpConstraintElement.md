@@ -8,40 +8,43 @@ import javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 
 /**
- * Java Class representation of an {@link HttpConstraint} annotation value.
- *
- * @since Servlet 3.0
+ * 此类用于表示HttpConstraint注解值.
  */
 public class HttpConstraintElement {
 
+    /**
+     * 定义应用于被允许的角色是空数组上的访问语义.
+     */
     private EmptyRoleSemantic emptyRoleSemantic;
+
+    /**
+     * 定义数据传输的保护要求.
+     */
     private TransportGuarantee transportGuarantee;
+
+    /**
+     * 授权的角色.
+     */
     private String[] rolesAllowed;
 
     /**
-     * Constructs a default HTTP constraint element
+     * 构造器 默认的HTTP约束元素
+     * 也就是EmptyRoleSemantic.PERMIT、TransportGuarantee.NONE以及
+     * rolesAllowed为空数组.
      */
     public HttpConstraintElement() {
         this(EmptyRoleSemantic.PERMIT);
     }
 
     /**
-     * Convenience constructor to establish <tt>EmptyRoleSemantic.DENY</tt>
-     *
-     * @param semantic should be EmptyRoleSemantic.DENY
+     * 便捷构造器 建立EmptyRoleSemantic.DENY
      */
     public HttpConstraintElement(EmptyRoleSemantic semantic) {
         this(semantic, TransportGuarantee.NONE, new String[0]);
     }
 
     /**
-     * Constructor to establish non-empty getRolesAllowed and/or
-     * <tt>TransportGuarantee.CONFIDENTIAL</tt>.
-     *
-     * @param guarantee <tt>TransportGuarantee.NONE</tt> or
-     * <tt>TransportGuarantee.CONFIDENTIAL</tt>
-     * @param roleNames the names of the roles that are to be
-     * allowed access
+     * 构造器 建立非空返回值getRolesAllowed，和/或TransportGuarantee.CONFIDENTIAL
      */
     public HttpConstraintElement(TransportGuarantee guarantee,
             String... roleNames) {
@@ -49,18 +52,11 @@ public class HttpConstraintElement {
     }
 
     /**
-     * Constructor to establish all of getEmptyRoleSemantic,
-     * getRolesAllowed, and getTransportGuarantee.
-     *
-     * @param semantic <tt>EmptyRoleSemantic.DENY</tt> or
-     * <tt>EmptyRoleSemantic.PERMIT</tt>
-     * @param guarantee <tt>TransportGuarantee.NONE</tt> or
-     * <tt>TransportGuarantee.CONFIDENTIAL</tt>
-     * @param roleNames the names of the roles that are to be allowed
-     * access, or missing if the semantic is <tt>EmptyRoleSemantic.DENY</tt>
+     * 构造器，建立getEmptyRoleSemantic/getRolesAllowed/getTransportGuarantee
      */
     public HttpConstraintElement(EmptyRoleSemantic semantic,
             TransportGuarantee guarantee, String... roleNames) {
+        // roleNames非空，不应该指定EmptyRoleSemantic.DENY
         if (semantic == EmptyRoleSemantic.DENY && roleNames.length > 0) {
             throw new IllegalArgumentException(
                 "Deny semantic with rolesAllowed");
@@ -71,54 +67,30 @@ public class HttpConstraintElement {
     }
 
     /**
-     * Gets the default authorization semantic.
-     *
-     * <p>This value is insignificant when <code>getRolesAllowed</code>
-     * returns a non-empty array, and should not be specified when a
-     * non-empty array is specified for <tt>getRolesAllowed</tt>.
-     *
-     * @return the {@link EmptyRoleSemantic} to be applied when
-     * <code>getRolesAllowed</code> returns an empty (that is, zero-length)
-     * array
+     * 获取默认授权语义.
      */
     public EmptyRoleSemantic getEmptyRoleSemantic() {
         return this.emptyRoleSemantic;
     }
 
     /**
-     * Gets the data protection requirement (i.e., whether or not SSL/TLS is
-     * required) that must be satisfied by the transport connection.
-     *
-     * @return the {@link TransportGuarantee} indicating the data
-     * protection that must be provided by the connection
+     * 返回传输连接需要满足的数据保护要求(是否需要SSL/TSL安全协议).
      */
     public TransportGuarantee getTransportGuarantee() {
         return this.transportGuarantee;
     }
 
     /**
-     * Gets the names of the authorized roles.
-     *
-     * <p>Duplicate role names appearing in getRolesAllowed are insignificant
-     * and may be discarded. The String <tt>"*"</tt> has no special meaning
-     * as a role name (should it occur in getRolesAllowed).
-     *
-     * @return a (possibly empty) array of role names. When the
-     * array is empty, its meaning depends on the value of
-     * {@link #getEmptyRoleSemantic}. If its value is <tt>DENY</tt>,
-     * and <code>getRolesAllowed</code> returns an empty array,
-     * access is to be denied independent of authentication state and
-     * identity. Conversely, if its value is <code>PERMIT</code>, it
-     * indicates that access is to be allowed independent of authentication
-     * state and identity. When the array contains the names of one or
-     * more roles, it indicates that access is contingent on membership in at
-     * least one of the named roles (independent of the value of
-     * {@link #getEmptyRoleSemantic}).
+     * 返回授权角色名.
      */
     public String[] getRolesAllowed() {
         return copyStrings(this.rolesAllowed);
     }
 
+    /**
+     * 可以使用return (strings != null) ? strings.clone() : new String[0]
+     * 达到相同的效果(深度拷贝字符串数组).
+     */
     private String[] copyStrings(String[] strings) {
         String[] arr = null;
         if (strings != null) {

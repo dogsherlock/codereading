@@ -9,64 +9,38 @@ import javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
 import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 
 /**
- * This annotation is used within the {@link ServletSecurity} annotation to
- * represent security constraints on specific HTTP protocol messages.
- *
- * @since Servlet 3.0
+ * 可以在ServletSecurity注解中使用此注解，表示特定的HTTP方法消息上的安全约束.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface HttpMethodConstraint {
 
     /**
-     * Http protocol method name
-     *
-     * @return the name of an HTTP protocol method. <code>value</code>
-     * may not be null, or the empty string, and must be a
-     * legitimate HTTP Method name as defined by RFC 2616.
+     * HTTP协议方法名.
+     * 
+     * @return 返回HTTP协议方法名，值可能不能为null、空字符串，并且必须是RFC 2616
+     * 中定义的合法的HTTP方法名.
      */
     String value();
 
     /**
-     * The default authorization semantic.
-     * This value is insignificant when <code>rolesAllowed</code> returns a
-     * non-empty array, and should not be specified when a non-empty
-     * array is specified for <tt>rolesAllowed</tt>.
+     * 默认授权语义.
+     * 当rolesAllowed返回非空数组的时候，此值是无意义的，此时不应该指定此值.
      *
-     * @return the {@link EmptyRoleSemantic} to be applied when
-     * <code>rolesAllowed</code> returns an empty (that is, zero-length) array.
+     * @return 返回当rolesAllowed返回空数组(长度为0)，应用的EmptyRoleSemantic
      */
     EmptyRoleSemantic emptyRoleSemantic() default EmptyRoleSemantic.PERMIT;
 
     /**
-     * The data protection requirements (i.e., whether or not SSL/TLS is
-     * required) that must be satisfied by the connections on which requests
-     * arrive.
-     *
-     * @return the {@link TransportGuarantee}
-     * indicating the data protection that must be provided by the connection.
+     * 客户端与服务端数据传输的保护要求(即，是否需要SSL/TSL安全协议加密)
      */
     TransportGuarantee transportGuarantee() default TransportGuarantee.NONE;
 
     /**
-     * The names of the authorized roles.
+     * 授权角色名数组
      *
-     * Duplicate role names appearing in rolesAllowed are insignificant and
-     * may be discarded during runtime processing of the annotation. The String
-     * <tt>"*"</tt> has no special meaning as a role name (should it occur in
-     * rolesAllowed).
-     *
-     * @return an array of zero or more role names. When the array contains
-     * zero elements, its meaning depends on the value returned by
-     * <code>emptyRoleSemantic</code>. If <code>emptyRoleSemantic</code> returns
-     * <tt>DENY</tt>, and <code>rolesAllowed</code> returns a zero length array,
-     * access is to be denied independent of authentication state and identity.
-     * Conversely, if <code>emptyRoleSemantic</code> returns
-     * <code>PERMIT</code>, it indicates that access is to be allowed
-     * independent of authentication state and identity. When the array
-     * contains the names of one or more roles, it indicates that access is
-     * contingent on membership in at least one of the named roles (independent
-     * of the value returned by <code>emptyRoleSemantic</code>).
+     * 出现在rolesAllowed中的重复角色名是无意义的，可能会在注解运行时处理时被丢弃.
+     * 字符串"*"作为一个角色名没有特殊意义(是否可以出现在rolesAllowed中).
      */
     String[] rolesAllowed() default {};
 }

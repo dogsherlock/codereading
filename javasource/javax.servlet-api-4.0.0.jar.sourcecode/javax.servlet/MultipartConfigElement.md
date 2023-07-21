@@ -5,21 +5,34 @@ package javax.servlet;
 import javax.servlet.annotation.MultipartConfig;
 
 /**
- * Java Class represntation of an {@link MultipartConfig} annotation value.
- *
- * @since Servlet 3.0
+ * 此类表示一个MultipartConfig注解值.
  */
 public class MultipartConfigElement {
 
+    /**
+     * 指定上传文件的存储目录. 默认值是"".
+     */
     private String location;
+    
+    /**
+     * 单个上传文件的最大大小(bytes). 默认值是-1L.
+     */
     private long maxFileSize;
+
+    /**
+     * 限制multipart/form-data请求中数据的大小(bytes). 默认值是-1L.
+     */
     private long maxRequestSize;
+
+    /**
+     * 指定缓存大小，超过缓存大小会写入磁盘. 默认值是0.
+     */
     private int fileSizeThreshold;
 
     /**
-     * Constructs an instance with defaults for all but location.
+     * 构造器，使用给定的location参数，构造一个带有其他属性为默认值的实例.
      *
-     * @param location defualts to "" if values is null.
+     * @param location location为null，则默认是"".
      */
     public MultipartConfigElement(String location) {
         if (location == null) {
@@ -33,14 +46,7 @@ public class MultipartConfigElement {
     }
 
     /**
-     * Constructs an instance with all values specified.
-     *
-     * @param location the directory location where files will be stored
-     * @param maxFileSize the maximum size allowed for uploaded files
-     * @param maxRequestSize the maximum size allowed for
-     * multipart/form-data requests
-     * @param fileSizeThreshold the size threshold after which files will
-     * be written to disk
+     * 构造器，所有的值由参数给定，构造实例.
      */
     public MultipartConfigElement(String location, long maxFileSize,
             long maxRequestSize, int fileSizeThreshold) {
@@ -55,9 +61,7 @@ public class MultipartConfigElement {
     }
 
     /**
-     * Constructs an instance from a {@link MultipartConfig} annotation value.
-     *
-     * @param annotation the annotation value
+     * 构造器，由参数MultipartConfig注解值创建实例.
      */
     public MultipartConfigElement(MultipartConfig annotation) {
         this.location = annotation.location();
@@ -67,36 +71,28 @@ public class MultipartConfigElement {
     }
 
     /**
-     * Gets the directory location where files will be stored.
-     *
-     * @return the directory location where files will be stored
+     * 获取存储文件的目录位置.
      */
     public String getLocation() {
         return this.location;
     }
 
     /**
-     * Gets the maximum size allowed for uploaded files.
-     *
-     * @return the maximum size allowed for uploaded files
+     * 获取单个上传文件的最大大小(bytes)
      */
     public long getMaxFileSize() {
         return this.maxFileSize;
     }
 
     /**
-     * Gets the maximum size allowed for multipart/form-data requests.
-     *
-     * @return the maximum size allowed for multipart/form-data requests
+     * 获取限制multipart/form-data请求中数据的大小(bytes).
      */
     public long getMaxRequestSize() {
         return this.maxRequestSize;
     }
 
     /**
-     * Gets the size threshold after which files will be written to disk.
-     *
-     * @return the size threshold after which files will be written to disk
+     * 获取文件被写入磁盘的大小阈值.
      */
     public int getFileSizeThreshold() {
         return this.fileSizeThreshold;
